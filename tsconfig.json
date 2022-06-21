@@ -1,0 +1,33 @@
+{
+  "ts-node": {
+    "files": true
+  },
+  "include": ["env.d.ts", "src/**/*"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "outDir": "build",
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": ["esnext", "esnext.asynciterable"],
+    "moduleResolution": "node",
+    "declaration": false,
+    "composite": false,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "sourceMap": false,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true
+  }
+}
