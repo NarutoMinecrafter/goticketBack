@@ -1,6 +1,8 @@
 import dotenv from 'dotenv'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
+import { Logger } from '@nestjs/common'
+import swagger from './bootstrap/swagger'
 
 const envFound = dotenv.config()
 
@@ -13,8 +15,10 @@ const envFound = dotenv.config()
     }
 
     const app = await NestFactory.create(AppModule)
-    await app.listen(PORT, () => console.log(`🚀 Server has been started on port: ${PORT}...`))
+    swagger(app)
+
+    await app.listen(PORT, () => Logger.log(`🚀 Server has been started on port: ${PORT}...`))
   } catch (error) {
-    console.log(`❌ Error: \n ${error}`)
+    Logger.error(`❌ Error: \n ${error}`)
   }
 })()
