@@ -18,9 +18,12 @@ export class CreateUserDto {
   @IsEmail()
   readonly email: string
 
-  @ApiProperty({ example: 'example@gmail.com', description: 'Bithdate' })
+  @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Bithdate' })
   @IsDate()
   readonly bithdate: Date
+
+  @ApiProperty({ example: '123456789', description: 'ID code' })
+  readonly IDcode: string
 
   @ApiProperty({ example: '@example', description: 'Instagram' })
   @IsOptional()

@@ -8,15 +8,16 @@ import { User } from './user.entity'
 export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-  async create(dto: CreateUserDto) {
-    return await this.userRepository.create(dto)
+  create(dto: CreateUserDto) {
+    // TODO: Remove User
+    return this.userRepository.save(this.userRepository.create(dto))
   }
 
-  async getAll() {
-    return await this.userRepository.find()
+  getAll() {
+    return this.userRepository.find()
   }
 
-  async getBy(key: keyof User, value: User[keyof User]) {
-    return await this.userRepository.findOneBy({ [key]: value })
+  getBy(key: keyof User, value: User[keyof User]) {
+    return this.userRepository.findOneBy({ [key]: value })
   }
 }

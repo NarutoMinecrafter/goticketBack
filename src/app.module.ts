@@ -1,8 +1,11 @@
+import dotenv from 'dotenv'
 import { Module } from '@nestjs/common'
 import { UserModule } from './user/user.module'
 import { AuthModule } from './auth/auth.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from './user/user.entity'
+
+dotenv.config()
 
 const { PG_URL } = process.env
 

@@ -1,7 +1,7 @@
 import { CreateUserDto } from './../user/user.dto'
 import { Body, Controller, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { CodeDto } from './auth.dto'
+import { CodeDto, PhoneDto } from './auth.dto'
 import { AuthService } from './auth.service'
 
 @ApiTags('Auth')
@@ -20,7 +20,7 @@ export class AuthController {
   }
 
   @Post('/send-code')
-  sendCode(@Body() dto: CodeDto) {
+  sendCode(@Body() dto: PhoneDto) {
     return this.authService.sendCode(dto)
   }
 }

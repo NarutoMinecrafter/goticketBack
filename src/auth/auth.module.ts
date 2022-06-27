@@ -1,13 +1,16 @@
+import dotenv from 'dotenv'
 import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
-import { UserService } from './../user/user.service'
+import { UserModule } from './../user/user.module'
+
+dotenv.config()
 
 const { JWT_SECRET } = process.env
 
 @Module({
-  imports: [JwtModule.register({ secret: JWT_SECRET, signOptions: { expiresIn: '30d' } }), UserService],
+  imports: [JwtModule.register({ secret: JWT_SECRET, signOptions: { expiresIn: '30d' } }), UserModule],
   providers: [AuthService],
   controllers: [AuthController],
   exports: [JwtModule]

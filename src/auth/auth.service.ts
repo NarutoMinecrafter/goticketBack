@@ -1,3 +1,4 @@
+import dotenv from 'dotenv'
 import { UserService } from './../user/user.service'
 import { TOTP } from '@otplib/core'
 import { createDigest } from '@otplib/plugin-crypto'
@@ -8,6 +9,8 @@ import { PhoneDto, CodeDto } from './auth.dto'
 import { CreateUserDto } from '../user/user.dto'
 import { Twilio } from 'twilio'
 
+dotenv.config()
+
 const { REDIS_URL, TOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
 
 interface IPhone {
@@ -17,7 +20,7 @@ interface IPhone {
 
 @Injectable()
 export class AuthService {
-  private totp = new TOTP({ step: 3600, createDigest })
+  private totp = new TOTP({ step: 3600, createDigest, digits: 4 })
   private redis: RedisClientType
   private twillo: Twilio
 
@@ -34,10 +37,12 @@ export class AuthService {
       const user = await this.userService.getBy('phone', dto.phone)
 
       if (user) {
-        const token = await this.jwtService.signAsync(user.id.toString())
+        const token = await this.jwtService.signAsync({ id: user.id })
 
         return { token }
       }
+
+      return { authorized: false, confirmed: true }
     }
 
     throw new UnauthorizedException()
@@ -50,7 +55,7 @@ export class AuthService {
 
     if (isConfirmed) {
       const user = await this.userService.create(dto)
-      const token = await this.jwtService.signAsync(user.id.toString())
+      const token = await this.jwtService.signAsync({ id: user.id })
 
       return { token }
     }

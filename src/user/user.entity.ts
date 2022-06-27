@@ -11,14 +11,17 @@ export class User {
   @Column({ nullable: false })
   surname!: string
 
-  @Column({ nullable: false })
+  @Column({ unique: true, nullable: false })
   phone!: string
 
   @Column({ unique: true })
   email: string
 
-  @Column('date')
+  @Column('date', { nullable: true })
   bithdate: Date
+
+  @Column({ unique: true })
+  IDcode: string
 
   @Column({ unique: true, nullable: true })
   instagram?: string
