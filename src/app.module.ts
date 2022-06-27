@@ -1,10 +1,24 @@
+import dotenv from 'dotenv'
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
+import { UserModule } from './user/user.module'
+import { AuthModule } from './auth/auth.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { User } from './user/user.entity'
+
+dotenv.config()
+
+const { PG_URL } = process.env
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService]
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: PG_URL,
+      entities: [User],
+      synchronize: true
+    }),
+    UserModule,
+    AuthModule
+  ]
 })
 export class AppModule {}
