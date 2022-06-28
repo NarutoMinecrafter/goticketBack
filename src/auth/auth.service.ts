@@ -20,9 +20,9 @@ interface IPhone {
 
 @Injectable()
 export class AuthService {
-  private totp = new TOTP({ step: 3600, createDigest, digits: 4 })
-  private redis: RedisClientType
-  private twillo: Twilio
+  private readonly totp = new TOTP({ step: 3600, createDigest, digits: 4 })
+  private readonly redis: RedisClientType
+  private readonly twillo: Twilio
 
   constructor(private readonly jwtService: JwtService, private readonly userService: UserService) {
     this.redis = createClient({ url: REDIS_URL })
@@ -32,6 +32,7 @@ export class AuthService {
 
   async login(dto: CodeDto) {
     const isConfirmed = await this.checkCode(dto)
+    console.log(dto, isConfirmed)
 
     if (isConfirmed) {
       const user = await this.userService.getBy('phone', dto.phone)
