@@ -15,6 +15,7 @@ const envFound = dotenv.config()
     }
 
     const app = await NestFactory.create(AppModule)
+    app.enableCors()
     swagger(app)
 
     await app.listen(PORT, () => Logger.log(`🚀 Server has been started on port: ${PORT}...`))
