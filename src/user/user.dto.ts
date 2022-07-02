@@ -35,7 +35,7 @@ export class CreateUserDto {
   @IsOptional()
   readonly instagram?: string
 
-  @ApiProperty({ example: 'man', description: 'sex' })
+  @ApiProperty({ example: 'man', description: 'Sex' })
   @IsEnum(SexEnum)
   readonly sex?: SexEnum
 }
