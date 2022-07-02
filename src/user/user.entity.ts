@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Event } from './../event/event.entity'
+import { Ticket } from '../ticket/ticket.entity'
 
 @Entity()
 export class User {
@@ -28,4 +30,10 @@ export class User {
 
   @Column({ nullable: true })
   avatar?: string
+
+  @ManyToMany(() => Ticket)
+  tickets: Ticket[]
+
+  @OneToMany(() => Event, event => event.creator)
+  events: Event[]
 }
