@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { SexEnum } from './user.dto'
 
 @Entity()
 export class User {
@@ -25,6 +26,9 @@ export class User {
 
   @Column({ unique: true, nullable: true })
   instagram?: string
+
+  @Column({ enum: SexEnum })
+  sex?: SexEnum
 
   @Column({ nullable: true })
   avatar?: string
