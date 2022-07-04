@@ -1,5 +1,5 @@
-import { CreateEventDto } from './event.dto'
-import { Body, Controller, Post } from '@nestjs/common'
+import { CreateEventDto, GetEventDto } from './event.dto'
+import { Body, Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
 
@@ -11,5 +11,14 @@ export class EventController {
   @Post()
   create(@Body() dto: CreateEventDto) {
     return this.eventService.create(dto)
+  }
+
+  @Get()
+  get(@Query() { id, sortBy, userLocation }: GetEventDto) {
+    if (id) {
+      return this.eventService.getBy('id', Number(id))
+    }
+
+    return this.eventService.getAll(sortBy, userLocation)
   }
 }

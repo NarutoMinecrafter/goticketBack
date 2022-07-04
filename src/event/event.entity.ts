@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from '../user/user.entity'
-import { Ticket } from './../ticket/ticket.entity'
+import { Ticket } from '../ticket/ticket.entity'
+import { Location } from './event.dto'
 
 @Entity()
 export class Event {
@@ -25,8 +26,8 @@ export class Event {
   @Column()
   fullDescription: string
 
-  @Column({ nullable: false })
-  address!: string
+  @Column({ nullable: false, type: 'json' })
+  location!: Location
 
   @Column({ nullable: false })
   bank!: string
