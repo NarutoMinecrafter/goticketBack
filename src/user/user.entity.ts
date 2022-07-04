@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Event } from './../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
+import { SexEnum } from './user.dto'
 
 @Entity()
 export class User {
@@ -27,6 +28,9 @@ export class User {
 
   @Column({ unique: true, nullable: true })
   instagram?: string
+
+  @Column({ enum: SexEnum })
+  sex?: SexEnum
 
   @Column({ nullable: true })
   avatar?: string
