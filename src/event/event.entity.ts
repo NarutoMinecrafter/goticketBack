@@ -10,7 +10,7 @@ export class Event {
   @Column({ nullable: false })
   title!: string
 
-  @Column({ array: true, length: 3, default: [] })
+  @Column('text', { array: true, default: [] })
   demo!: string[]
 
   @Column('date', { nullable: false })

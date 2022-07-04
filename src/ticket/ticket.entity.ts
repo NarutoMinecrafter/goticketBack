@@ -1,6 +1,6 @@
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from './../user/user.entity'
 import { Event } from './../event/event.entity'
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class Ticket {
@@ -34,7 +34,7 @@ export class Ticket {
   @Column('bool', { default: false })
   paid: boolean
 
-  @Column({ array: true, default: [] })
+  @Column('text', { array: true, default: [] })
   coupons: string[]
 
   @ManyToOne(() => Event)

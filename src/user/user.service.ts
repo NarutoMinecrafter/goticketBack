@@ -9,7 +9,6 @@ export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
   create(dto: CreateUserDto) {
-    // TODO: Remove User
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
