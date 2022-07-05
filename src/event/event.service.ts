@@ -32,6 +32,9 @@ export class EventService {
           // TODO: implement geolocation sorting
           return 0
         }
+        case SortTypes.ByCreateDate: {
+          return new Date(prev.createDate).getTime() - new Date(next.createDate).getTime()
+        }
       }
 
       return 0
@@ -43,4 +46,9 @@ export class EventService {
   getBy(key: keyof Event, value: Event[keyof Event]) {
     return this.eventRepository.findOneBy({ [key]: value })
   }
+
+  async getByAuthor(authorId: number): Promise<Event | null> {
+    return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getOne()
+  }
 }
+

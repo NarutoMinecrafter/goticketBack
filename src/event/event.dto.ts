@@ -4,7 +4,8 @@ import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsString } fro
 export enum SortTypes {
   ByDate = 'date',
   ByTicketsCount = 'tickets',
-  ByGeolocation = 'geo'
+  ByGeolocation = 'geo',
+  ByCreateDate = 'createDate'
 }
 
 export interface Location {
@@ -61,7 +62,7 @@ export class CreateEventDto {
 }
 
 export class GetEventDto {
-  @ApiProperty({ example: '1', description: 'Event id', required: false })
+  @ApiProperty({ example: '42', description: 'Event id', required: false })
   @IsString()
   readonly id?: string
 
@@ -76,4 +77,10 @@ export class GetEventDto {
   })
   @IsString()
   readonly userLocation?: StringLocation
+}
+
+export class GetEventByUserId {
+  @ApiProperty({ example: '69', description: 'User id', required: false })
+  @IsString()
+  readonly id?: string
 }

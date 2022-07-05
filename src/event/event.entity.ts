@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Location } from './event.dto'
@@ -19,6 +19,9 @@ export class Event {
 
   @Column('date')
   endDate: Date
+
+  @CreateDateColumn()
+  createDate: Date
 
   @Column({ nullable: false })
   shortDescription!: string

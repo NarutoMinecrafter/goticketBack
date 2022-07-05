@@ -3,7 +3,8 @@ import { IsDate, IsDateString, IsEmail, IsEnum, IsOptional, IsPhoneNumber, MinLe
 
 export enum SexEnum {
   Man = 'man',
-  Woman = 'woman'
+  Woman = 'woman',
+  Other = 'other'
 }
 
 export class CreateUserDto {
@@ -35,7 +36,7 @@ export class CreateUserDto {
   @IsOptional()
   readonly instagram?: string
 
-  @ApiProperty({ example: 'man', description: 'Sex', enum: SexEnum })
+  @ApiProperty({ example: 'other', description: 'Sex', enum: SexEnum })
   @IsEnum(SexEnum)
   readonly sex?: SexEnum
 }
