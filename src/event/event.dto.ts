@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator'
+import { CreateTicketDto } from '../ticket/ticket.dto'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -19,7 +20,7 @@ export class CreateEventDto {
   @ApiProperty({ example: 'Comic con', description: 'Title' })
   @IsString()
   @IsNotEmpty()
-  readonly title!: string
+  readonly name!: string
 
   @ApiProperty({ example: 'Anime fest', description: 'Short description' })
   @IsString()
@@ -59,6 +60,9 @@ export class CreateEventDto {
     required: true
   })
   readonly location?: Location
+
+  @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
+  readonly tickets: CreateTicketDto[]
 }
 
 export class GetEventDto {

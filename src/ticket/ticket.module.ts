@@ -5,6 +5,7 @@ import { TicketService } from './ticket.service'
 
 @Module({
   imports: [TypeOrmModule.forFeature([Ticket])],
-  providers: [TicketService]
+  providers: [TicketService],
+  exports: [TicketService]
 })
 export class TicketModule {}

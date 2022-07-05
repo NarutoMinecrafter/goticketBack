@@ -1,16 +1,19 @@
 import { CreateEventDto, GetEventByUserId, GetEventDto } from './event.dto'
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { User } from '../user/user.entity'
 
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() dto: CreateEventDto) {
-    return this.eventService.create(dto)
+  create(@Body() dto: CreateEventDto, @Req() { user }: Record<'user', User>) {
+    return this.eventService.create(dto, user)
   }
 
   @Get()

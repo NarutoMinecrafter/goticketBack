@@ -19,4 +19,8 @@ export class UserService {
   getBy(key: keyof User, value: User[keyof User]) {
     return this.userRepository.findOneBy({ [key]: value })
   }
+
+  update(user: User) {
+    return this.userRepository.update(user.id, user)
+  }
 }

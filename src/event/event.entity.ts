@@ -9,7 +9,7 @@ export class Event {
   id!: number
 
   @Column({ nullable: false })
-  title!: string
+  name!: string
 
   @Column('text', { array: true, default: [] })
   demo!: string[]

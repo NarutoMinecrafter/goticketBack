@@ -21,7 +21,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/profile')
-  profile(@Req() { user }: Record<'user', User | null | undefined>) {
+  profile(@Req() { user }: Record<'user', User>) {
     return user
   }
 }

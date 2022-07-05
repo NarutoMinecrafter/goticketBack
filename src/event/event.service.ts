@@ -1,15 +1,30 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { TicketService } from '../ticket/ticket.service'
+import { User } from '../user/user.entity'
+import { UserService } from '../user/user.service'
 import { CreateEventDto, SortTypes, StringLocation } from './event.dto'
 import { Event } from './event.entity'
 
 @Injectable()
 export class EventService {
-  constructor(@InjectRepository(Event) private readonly eventRepository: Repository<Event>) {}
+  constructor(
+    @InjectRepository(Event) private readonly eventRepository: Repository<Event>,
+    private readonly userService: UserService,
+    private readonly ticketService: TicketService
+  ) {}
 
-  create(dto: CreateEventDto) {
-    return this.eventRepository.save(this.eventRepository.create(dto))
+  async create({ tickets: ticketsDto, ...dto }: CreateEventDto, user: User) {
+    const event = await this.eventRepository.save(this.eventRepository.create(dto))
+
+    const tickets = await Promise.all(ticketsDto.map(ticket => this.ticketService.create(ticket)))
+
+    event.tickets = tickets
+
+    await this.userService.update({ ...user, events: [...user.events, event] })
+
+    return event
   }
 
   async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
@@ -51,4 +66,3 @@ export class EventService {
     return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getOne()
   }
 }
-
