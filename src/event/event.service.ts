@@ -72,7 +72,7 @@ export class EventService {
     return this.eventRepository.findOneBy({ [key]: value })
   }
 
-  async getByAuthor(authorId: number): Promise<Event | null> {
+  async getByAuthor(authorId: number) {
     return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getOne()
   }
 }

@@ -31,7 +31,7 @@ export class TicketService {
       throw new BadRequestException(`Ticket with id ${id} is not defined!`)
     }
 
-    ticket.count -= count
+    ticket.currentCount -= count
 
     await this.guestService.create({ additionalInfo, user, event, ticket })
   }

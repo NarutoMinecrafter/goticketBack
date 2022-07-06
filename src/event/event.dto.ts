@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
-import { ILocation } from './event.entity'
+import { Location } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -10,7 +10,7 @@ export enum SortTypes {
   ByCreateDate = 'createDate'
 }
 
-export type StringLocation = `${ILocation['lat']}-${ILocation['lon']}`
+export type StringLocation = `${Location['lat']}-${Location['lon']}`
 
 export class CreateEventDto {
   @ApiProperty({ example: 'Comic con', description: 'Title' })
@@ -55,7 +55,7 @@ export class CreateEventDto {
     description: 'Event latitude/longitude location',
     required: true
   })
-  readonly location: ILocation
+  readonly location: Location
 
   @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
   @IsArray()

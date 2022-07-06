@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator'
-import { RequiredAdditionalInfo, defaultRequiredAdditionalInfo } from './ticket.entity'
+import { RequiredAdditionalInfo } from './ticket.entity'
 import { AdditionalInfoDto } from '../guest/guest.dto'
 import { User } from '../user/user.entity'
 import { Event } from '../event/event.entity'
@@ -35,7 +35,11 @@ export class CreateTicketDto {
   @IsNotEmpty()
   readonly totalCount!: number
 
-  @ApiProperty({ example: defaultRequiredAdditionalInfo, description: 'Required additional info for organizers' })
+  @ApiProperty({
+    example: () => RequiredAdditionalInfo,
+    description: 'Required additional info for organizers',
+    type: () => RequiredAdditionalInfo
+  })
   additionalInfo?: RequiredAdditionalInfo
 }
 

@@ -1,9 +1,10 @@
-import { BuyTicketsDto, CreateEventDto, GetEventByUserId, GetEventDto } from './event.dto'
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { BuyTicketsDto, CreateEventDto, GetEventDto } from './event.dto'
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { User } from '../user/user.entity'
+import { Event } from './event.entity'
 
 @ApiTags('Event')
 @Controller('event')
@@ -22,6 +23,7 @@ export class EventController {
     return this.eventService.buyTickets(dto, user)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   get(@Query() { id, sortBy, userLocation }: GetEventDto) {
     if (id) {
@@ -31,8 +33,10 @@ export class EventController {
     return this.eventService.getAll(sortBy, userLocation)
   }
 
-  @Get('/user/:id')
-  getMyEvents(@Param() params: GetEventByUserId) {
-    return this.eventService.getByAuthor(Number(params.id))
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: () => Event })
+  @Get('/me')
+  getMyEvents(@Req() { user }: Record<'user', User>) {
+    return this.eventService.getByAuthor(Number(user.id))
   }
 }
