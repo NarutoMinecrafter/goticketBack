@@ -8,6 +8,8 @@ import { TicketModule } from './ticket/ticket.module'
 import { Ticket } from './ticket/ticket.entity'
 import { EventModule } from './event/event.module'
 import { Event } from './event/event.entity'
+import { GuestModule } from './guest/guest.module'
+import { Guest } from './guest/guest.entity'
 
 dotenv.config()
 
@@ -18,13 +20,14 @@ const { PG_URL } = process.env
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: PG_URL,
-      entities: [User, Ticket, Event],
+      entities: [User, Ticket, Event, Guest],
       synchronize: true
     }),
     UserModule,
     AuthModule,
     TicketModule,
-    EventModule
+    EventModule,
+    GuestModule
   ]
 })
 export class AppModule {}

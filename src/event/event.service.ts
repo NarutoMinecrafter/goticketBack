@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
 import { UserService } from '../user/user.service'
-import { CreateEventDto, SortTypes, StringLocation } from './event.dto'
+import { BuyTicketsDto, CreateEventDto, SortTypes, StringLocation } from './event.dto'
 import { Event } from './event.entity'
 
 @Injectable()
@@ -25,6 +25,16 @@ export class EventService {
     await this.userService.update({ ...user, events: [...user.events, event] })
 
     return event
+  }
+
+  async buyTickets({ id, tickets }: BuyTicketsDto, user: User) {
+    const event = await this.getBy('id', id)
+
+    if (!event) {
+      throw new BadRequestException(`Event with id ${id} is not defined!`)
+    }
+
+    tickets.forEach(async ticket => await this.ticketService.buy({ ...ticket, event, user }))
   }
 
   async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {

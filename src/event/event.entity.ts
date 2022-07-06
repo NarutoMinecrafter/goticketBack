@@ -1,7 +1,27 @@
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
-import { Location } from './event.dto'
+import { Guest } from '../guest/guest.entity'
+
+export enum TypeEnum {
+  Music = 'Music',
+  Concert = 'Concert',
+  Dance = 'Dance',
+  Education = 'Education',
+  Conference = 'Conference',
+  Workshop = 'Workshop',
+  Festival = 'Festival',
+  DJSet = 'DJ-set',
+  Art = 'Art',
+  Theater = 'Theater',
+  Cinema = 'Cinema',
+  Exhibition = 'Exhibition'
+}
+
+export interface ILocation {
+  lat: number
+  lon: number
+}
 
 @Entity()
 export class Event {
@@ -29,8 +49,11 @@ export class Event {
   @Column()
   fullDescription: string
 
-  @Column({ nullable: false, type: 'json' })
-  location!: Location
+  @Column({ enum: TypeEnum })
+  type: TypeEnum
+
+  @Column('json', { nullable: false })
+  location!: ILocation
 
   @Column({ nullable: false })
   bank!: string
@@ -50,6 +73,6 @@ export class Event {
   @ManyToMany(() => User)
   members: User[]
 
-  @ManyToMany(() => User)
-  guests: User[]
+  @ManyToMany(() => Guest)
+  guests: Guest[]
 }

@@ -1,4 +1,4 @@
-import { CreateEventDto, GetEventByUserId, GetEventDto } from './event.dto'
+import { BuyTicketsDto, CreateEventDto, GetEventByUserId, GetEventDto } from './event.dto'
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
@@ -14,6 +14,12 @@ export class EventController {
   @Post()
   create(@Body() dto: CreateEventDto, @Req() { user }: Record<'user', User>) {
     return this.eventService.create(dto, user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('buy-tickets')
+  buyTickets(@Body() dto: BuyTicketsDto, @Req() { user }: Record<'user', User>) {
+    return this.eventService.buyTickets(dto, user)
   }
 
   @Get()

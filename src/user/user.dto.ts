@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsDate, IsDateString, IsEmail, IsEnum, IsOptional, IsPhoneNumber, MinLength } from 'class-validator'
+import { IsDate, IsDateString, IsEmail, IsEnum, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator'
 
 export enum SexEnum {
   Man = 'man',
@@ -25,11 +25,12 @@ export class CreateUserDto {
   readonly email: string
 
   @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Birthday' })
+  @IsDateString()
   @IsDate()
   readonly birthday: Date
 
   @ApiProperty({ example: '123456789', description: 'ID code' })
-  @IsDateString()
+  @IsString()
   readonly IDcode: string
 
   @ApiProperty({ example: '@example', description: 'Instagram' })
@@ -43,5 +44,5 @@ export class CreateUserDto {
 
 export class GetUserDto {
   @ApiProperty({ example: '1', description: 'User id', required: false })
-  id?: string
+  readonly id?: string
 }

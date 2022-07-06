@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator'
-import { CreateTicketDto } from '../ticket/ticket.dto'
+import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
+import { ILocation } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -9,12 +10,7 @@ export enum SortTypes {
   ByCreateDate = 'createDate'
 }
 
-export interface Location {
-  lat: number
-  lon: number
-}
-
-export type StringLocation = `${Location['lat']}-${Location['lon']}`
+export type StringLocation = `${ILocation['lat']}-${ILocation['lon']}`
 
 export class CreateEventDto {
   @ApiProperty({ example: 'Comic con', description: 'Title' })
@@ -59,10 +55,12 @@ export class CreateEventDto {
     description: 'Event latitude/longitude location',
     required: true
   })
-  readonly location?: Location
+  readonly location: ILocation
 
   @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
-  readonly tickets: CreateTicketDto[]
+  @IsArray()
+  @IsNotEmpty()
+  readonly tickets!: CreateTicketDto[]
 }
 
 export class GetEventDto {
@@ -87,4 +85,16 @@ export class GetEventByUserId {
   @ApiProperty({ example: '69', description: 'User id', required: false })
   @IsString()
   readonly id?: string
+}
+
+export class BuyTicketsDto {
+  @ApiProperty({ example: 1, description: 'Event id' })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly id!: number
+
+  @ApiProperty({ type: [BuyTicketDto], description: 'Array of tickets' })
+  @IsArray()
+  @IsNotEmpty()
+  readonly tickets!: BuyTicketDto[]
 }

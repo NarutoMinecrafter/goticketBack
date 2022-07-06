@@ -1,6 +1,16 @@
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { User } from './../user/user.entity'
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Event } from './../event/event.entity'
+import { Guest } from './../guest/guest.entity'
+
+export const defaultRequiredAdditionalInfo = {
+  age: false,
+  minAge: false as false | number,
+  sex: false,
+  IDcode: false,
+  instagram: false
+}
+
+export type RequiredAdditionalInfo = Partial<typeof defaultRequiredAdditionalInfo>
 
 @Entity()
 export class Ticket {
@@ -31,6 +41,9 @@ export class Ticket {
   @Column()
   type: string
 
+  @Column('json', { default: defaultRequiredAdditionalInfo })
+  requiredAdditionalInfo: RequiredAdditionalInfo
+
   @Column('bool', { default: false })
   paid: boolean
 
@@ -40,6 +53,6 @@ export class Ticket {
   @ManyToOne(() => Event)
   event: Event
 
-  @ManyToMany(() => User)
-  users: []
+  @OneToMany(() => Guest, guest => guest.ticket)
+  guests: Guest[]
 }

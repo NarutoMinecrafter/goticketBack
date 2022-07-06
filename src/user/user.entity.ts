@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Event } from './../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { SexEnum } from './user.dto'
+import { Guest } from '../guest/guest.entity'
 
 @Entity()
 export class User {
@@ -35,7 +36,7 @@ export class User {
   @Column({ nullable: true })
   avatar?: string
 
-  @ManyToMany(() => Ticket)
+  @OneToMany(() => Guest, guest => guest.user)
   tickets: Ticket[]
 
   @OneToMany(() => Event, event => event.creator)
