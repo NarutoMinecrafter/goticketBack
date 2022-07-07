@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { UserService } from './user.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { User } from './user.entity'
@@ -10,6 +10,8 @@ import { GetUserDto } from './user.dto'
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @ApiOkResponse({ type: User, description: 'User with specified id' })
+  @ApiResponse({ type: User, isArray: true, description: 'All users if id is not specified' })
   @Get()
   get(@Query() { id }: GetUserDto) {
     if (id) {
@@ -20,8 +22,9 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: User, description: 'Current user' })
   @Get('/profile')
-  profile(@Req() { user }: Record<'user', User | null | undefined>) {
+  profile(@Req() { user }: Record<'user', User>) {
     return user
   }
 }
