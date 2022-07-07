@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from '../user/user.entity'
 import { Event } from '../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
@@ -24,14 +24,14 @@ export class Guest {
   additionalInfo: AdditionalInfoDto
 
   @ApiProperty({ description: 'User of this Guest', example: () => User, type: () => User })
-  @OneToOne(() => User)
+  @ManyToOne(() => User, user => user.guests)
   user: User
 
   @ApiProperty({ description: 'The event this guest is at', example: () => Event, type: () => Event })
-  @ManyToOne(() => Event)
+  @ManyToOne(() => Event, event => event.guests)
   event: Event
 
   @ApiProperty({ description: "This guest's ticket", example: () => Ticket, type: () => Ticket })
-  @ManyToOne(() => Ticket)
+  @ManyToOne(() => Ticket, ticket => ticket.guests)
   ticket: Ticket
 }

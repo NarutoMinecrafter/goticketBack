@@ -1,26 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Event } from '../event/event.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { RequiredAdditionalInfoDto } from './ticket.dto'
 
-export class RequiredAdditionalInfo {
-  @ApiProperty({ description: 'Does a person have to indicate age to buy this ticket', example: true })
-  isAgeRequired = false
-
-  @ApiProperty({ description: 'Does a person have to indicate sex to buy this ticket', example: false })
-  isSexRequired = false
-
-  @ApiProperty({ description: 'Does a person have to indicate phone to buy this ticket', example: false })
-  isPhoneRequired = false
-
-  @ApiProperty({ description: 'Does a person have to indicate ID-Code to buy this ticket', example: false })
-  isIDCodeRequired = false
-
-  @ApiProperty({ description: 'Does a person have to indicate instagram link to buy this ticket', example: false })
-  isInstagramRequired = false
-}
-
-export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfo()
+export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
 
 @Entity()
 export class Ticket {
@@ -45,16 +29,16 @@ export class Ticket {
   maxPrice: number
 
   @ApiProperty({ description: 'Ticket service charge', example: 2 })
-  @Column('int')
+  @Column('int', { default: 12 })
   serviceCharge: number
 
-  @ApiProperty({ description: 'Number of current tickets', example: 10 })
-  @Column('int', { nullable: false })
-  currentCount!: number
-
-  @ApiProperty({ description: 'Number of total tickets', example: 30 })
+  @ApiProperty({ description: 'Totla count of tickets', example: 30 })
   @Column('int', { nullable: false })
   totalCount!: number
+
+  @ApiProperty({ description: 'Current count of tickets', example: 10 })
+  @Column('int', { nullable: false })
+  currentCount!: number
 
   @ApiProperty({ description: 'Tickets type', example: 'VIP' })
   @Column()
@@ -62,11 +46,11 @@ export class Ticket {
 
   @ApiProperty({
     description: 'Is some additional info required',
-    example: () => RequiredAdditionalInfo,
-    type: () => RequiredAdditionalInfo
+    example: () => RequiredAdditionalInfoDto,
+    type: () => RequiredAdditionalInfoDto
   })
   @Column('json', { default: defaultRequiredAdditionalInfo })
-  requiredAdditionalInfo: RequiredAdditionalInfo
+  requiredAdditionalInfo: RequiredAdditionalInfoDto
 
   @ApiProperty({ description: 'Can the ticket be booked', example: 30 })
   @Column('bool', { default: false })
@@ -77,10 +61,15 @@ export class Ticket {
   coupons: string[]
 
   @ApiProperty({ description: 'Event of this ticket', example: () => Event, type: () => Event })
-  @ManyToOne(() => Event)
+  @ManyToOne(() => Event, event => event.tickets)
   event: Event
 
-  @ApiProperty({ description: 'Users who bought this ticket', example: () => [Guest], type: () => [Guest] })
+  @ApiProperty({ description: 'Guests who bought this ticket', example: () => [Guest], type: () => [Guest] })
   @OneToMany(() => Guest, guest => guest.ticket)
   guests: Guest[]
+
+  @BeforeInsert()
+  setTotalCount() {
+    this.currentCount = this.totalCount
+  }
 }

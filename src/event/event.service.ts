@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
-import { UserService } from '../user/user.service'
 import { BuyTicketsDto, CreateEventDto, SortTypes, StringLocation } from './event.dto'
 import { Event } from './event.entity'
 
@@ -11,18 +10,16 @@ import { Event } from './event.entity'
 export class EventService {
   constructor(
     @InjectRepository(Event) private readonly eventRepository: Repository<Event>,
-    private readonly userService: UserService,
     private readonly ticketService: TicketService
   ) {}
 
   async create({ tickets: ticketsDto, ...dto }: CreateEventDto, user: User) {
-    const event = await this.eventRepository.save(this.eventRepository.create(dto))
-
+    let event = await this.eventRepository.create(dto)
     const tickets = await Promise.all(ticketsDto.map(ticket => this.ticketService.create(ticket)))
 
+    event.creator = user
     event.tickets = tickets
-
-    await this.userService.update({ ...user, events: [...user.events, event] })
+    event = await this.eventRepository.save(event)
 
     return event
   }
@@ -34,7 +31,7 @@ export class EventService {
       throw new BadRequestException(`Event with id ${id} is not defined!`)
     }
 
-    tickets.forEach(async ticket => await this.ticketService.buy({ ...ticket, event, user }))
+    return await Promise.all(tickets.map(async ticket => await this.ticketService.buy({ ...ticket, event, user })))
   }
 
   async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
@@ -47,7 +44,6 @@ export class EventService {
     events.sort((prev, next) => {
       switch (sortBy) {
         case SortTypes.ByDate: {
-          console.log(prev)
           return new Date(prev.startDate).getTime() - new Date(next.startDate).getTime()
         }
         case SortTypes.ByTicketsCount: {
@@ -73,6 +69,6 @@ export class EventService {
   }
 
   async getByAuthor(authorId: number) {
-    return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getOne()
+    return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
   }
 }

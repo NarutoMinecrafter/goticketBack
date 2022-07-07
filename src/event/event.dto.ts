@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
-import { Location } from './event.entity'
+import { Location, TypeEnum } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -39,6 +39,10 @@ export class CreateEventDto {
   @IsArray()
   @ArrayMaxSize(3)
   readonly demo: string[]
+
+  @ApiProperty({ example: TypeEnum.Festival, description: 'Event type', enum: TypeEnum })
+  @IsEnum(TypeEnum)
+  type: TypeEnum
 
   @ApiProperty({ example: '5555', description: 'Bank account' })
   @IsString()

@@ -93,7 +93,7 @@ export class Event {
   tickets: Ticket[]
 
   @ApiProperty({ description: 'Creator of this event', example: () => User, type: () => User })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, user => user.events)
   creator: User
 
   @ApiProperty({ description: 'Users of this event', example: () => [User], type: () => [User] })
@@ -101,6 +101,6 @@ export class Event {
   members: User[]
 
   @ApiProperty({ description: "Guest's of this event", example: () => [Guest], type: () => [Guest] })
-  @ManyToMany(() => Guest)
+  @OneToMany(() => Guest, guest => guest.event)
   guests: Guest[]
 }

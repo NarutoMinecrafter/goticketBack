@@ -51,3 +51,8 @@ export class CreateGuestDto {
   @IsNotEmpty()
   ticket: Ticket
 }
+
+export class GetGuestDto {
+  @ApiProperty({ example: '1', description: 'Guest id', required: false })
+  readonly id?: string
+}

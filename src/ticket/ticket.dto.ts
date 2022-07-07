@@ -1,9 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator'
-import { RequiredAdditionalInfo } from './ticket.entity'
+import { IsBoolean, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator'
 import { AdditionalInfoDto } from '../guest/guest.dto'
 import { User } from '../user/user.entity'
 import { Event } from '../event/event.entity'
+
+export class RequiredAdditionalInfoDto {
+  @ApiProperty({ description: 'Does a person have to indicate age to buy this ticket', example: true })
+  @IsBoolean()
+  isAgeRequired = false
+
+  @ApiProperty({ description: 'Minimum user age to purchase tickets', example: 18 })
+  @Min(0)
+  @IsNumber()
+  minRequiredAge = 0
+
+  @ApiProperty({ description: 'Does a person have to indicate sex to buy this ticket', example: false })
+  @IsBoolean()
+  isSexRequired = false
+
+  @ApiProperty({ description: 'Does a person have to indicate ID-Code to buy this ticket', example: false })
+  @IsBoolean()
+  isIDCodeRequired = false
+
+  @ApiProperty({ description: 'Does a person have to indicate instagram link to buy this ticket', example: false })
+  @IsBoolean()
+  isInstagramRequired = false
+}
 
 export class CreateTicketDto {
   @ApiProperty({ example: 'VIP', description: 'Type of tickets' })
@@ -36,11 +58,11 @@ export class CreateTicketDto {
   readonly totalCount!: number
 
   @ApiProperty({
-    example: () => RequiredAdditionalInfo,
+    example: () => RequiredAdditionalInfoDto,
     description: 'Required additional info for organizers',
-    type: () => RequiredAdditionalInfo
+    type: () => RequiredAdditionalInfoDto
   })
-  additionalInfo?: RequiredAdditionalInfo
+  additionalInfo?: RequiredAdditionalInfoDto
 }
 
 export class BuyTicketDto {
@@ -68,4 +90,9 @@ export class BuyTicketDto {
 
   @IsNotEmpty()
   event: Event
+}
+
+export class GetTicketDto {
+  @ApiProperty({ example: '1', description: 'Ticket id', required: false })
+  readonly id?: string
 }

@@ -20,7 +20,7 @@ export class UserService {
     return this.userRepository.findOneBy({ [key]: value })
   }
 
-  update(user: User) {
+  update(user: Partial<User> & Record<'id', User['id']>) {
     return this.userRepository.update(user.id, user)
   }
 }

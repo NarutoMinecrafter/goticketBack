@@ -1,6 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { Event } from '../event/event.entity'
-import { Ticket } from '../ticket/ticket.entity'
 import { SexEnum } from './user.dto'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
@@ -47,11 +46,11 @@ export class User {
   @Column({ nullable: true })
   avatar?: string
 
-  @ApiProperty({ description: 'User tickets', type: () => [Ticket] })
-  @OneToMany(() => Guest, guest => guest.user)
-  tickets: Ticket[]
-
   @ApiProperty({ description: 'User events', type: () => [Event] })
   @OneToMany(() => Event, event => event.creator)
   events: Event[]
+
+  @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest] })
+  @OneToMany(() => Guest, guest => guest.event)
+  guests: Guest[]
 }
