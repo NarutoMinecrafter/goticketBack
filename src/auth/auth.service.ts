@@ -32,7 +32,6 @@ export class AuthService {
 
   async login(dto: CodeDto) {
     const isConfirmed = await this.checkCode(dto)
-    console.log(dto, isConfirmed)
 
     if (isConfirmed) {
       const user = await this.userService.getBy('phone', dto.phone)

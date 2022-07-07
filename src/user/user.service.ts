@@ -9,7 +9,6 @@ export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
   create(dto: CreateUserDto) {
-    // TODO: Remove User
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
@@ -19,5 +18,9 @@ export class UserService {
 
   getBy(key: keyof User, value: User[keyof User]) {
     return this.userRepository.findOneBy({ [key]: value })
+  }
+
+  update(user: Partial<User> & Record<'id', User['id']>) {
+    return this.userRepository.update(user.id, user)
   }
 }

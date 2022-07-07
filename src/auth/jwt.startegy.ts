@@ -1,8 +1,9 @@
 import dotenv from 'dotenv'
-import { Injectable } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { UserService } from '../user/user.service'
+import { User } from '../user/user.entity'
 
 dotenv.config()
 
@@ -18,7 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate({ id }: Record<'id', string>) {
-    return await this.userService.getBy('id', Number(id))
+  async validate({ id }: Record<'id', User['id']>) {
+    const user = await this.userService.getBy('id', id)
+
+    if (!user) {
+      throw new UnauthorizedException()
+    }
+
+    return user
   }
 }
