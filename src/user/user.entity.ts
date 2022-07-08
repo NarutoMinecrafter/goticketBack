@@ -27,7 +27,7 @@ export class User {
   email: string
 
   @ApiProperty({ description: 'User birthdate', example: '25.01.1978' })
-  @Column('date', { nullable: true })
+  @Column('timestamptz', { nullable: true })
   birthdate: Date
 
   @ApiProperty({ description: 'User ID Code', example: '228' })
@@ -38,7 +38,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   instagram?: string
 
-  @ApiProperty({ description: 'User sex', example: SexEnum.Other })
+  @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
   @Column({ enum: SexEnum })
   sex?: SexEnum
 

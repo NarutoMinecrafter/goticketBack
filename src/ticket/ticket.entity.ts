@@ -2,9 +2,6 @@ import { BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedCol
 import { Event } from '../event/event.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { RequiredAdditionalInfoDto } from './ticket.dto'
-
-export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
 
 @Entity()
 export class Ticket {
@@ -44,21 +41,9 @@ export class Ticket {
   @Column()
   type: string
 
-  @ApiProperty({
-    description: 'Is some additional info required',
-    example: () => RequiredAdditionalInfoDto,
-    type: () => RequiredAdditionalInfoDto
-  })
-  @Column('json', { default: defaultRequiredAdditionalInfo })
-  requiredAdditionalInfo: RequiredAdditionalInfoDto
-
   @ApiProperty({ description: 'Can the ticket be booked', example: 30 })
   @Column('bool', { default: false })
   canBeBooked: boolean
-
-  @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
-  @Column('text', { array: true, default: [] })
-  coupons: string[]
 
   @ApiProperty({ description: 'Event of this ticket', example: () => Event, type: () => Event })
   @ManyToOne(() => Event, event => event.tickets)

@@ -1,6 +1,6 @@
-import { Guest } from './../guest/guest.entity'
-import { BuyTicketsDto, CreateEventDto, GetEventDto } from './event.dto'
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common'
+import { Guest } from '../guest/guest.entity'
+import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto } from './event.dto'
+import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
@@ -24,7 +24,7 @@ export class EventController {
   @Get()
   get(@Query() { id, sortBy, userLocation }: GetEventDto) {
     if (id) {
-      return this.eventService.getBy('id', Number(id))
+      return this.eventService.getBy('id', id)
     }
 
     return this.eventService.getAll(sortBy, userLocation)
@@ -34,7 +34,7 @@ export class EventController {
   @ApiOkResponse({ type: User, isArray: true, description: 'Current user events' })
   @Get('/me')
   getMyEvents(@Req() { user }: Record<'user', User>) {
-    return this.eventService.getByAuthor(Number(user.id))
+    return this.eventService.getByAuthor(user.id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -42,5 +42,12 @@ export class EventController {
   @Post('buy-tickets')
   buyTickets(@Body() dto: BuyTicketsDto, @Req() { user }: Record<'user', User>) {
     return this.eventService.buyTickets(dto, user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: Boolean, description: 'Change event values' })
+  @Put()
+  change(@Body() dto: ChangeEventDto, @Req() { user }: Record<'user', User>) {
+    return this.eventService.changeEvent(dto, user)
   }
 }
