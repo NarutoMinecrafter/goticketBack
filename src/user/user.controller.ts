@@ -15,7 +15,7 @@ export class UserController {
   @Get()
   get(@Query() { id }: GetUserDto) {
     if (id) {
-      return this.userService.getById(id)
+      return this.userService.getById(Number(id))
     }
 
     return this.userService.getAll()

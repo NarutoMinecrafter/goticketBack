@@ -2,20 +2,28 @@
   "ts-node": {
     "files": true
   },
-  "include": ["env.d.ts", "src/**/*"],
-  "exclude": ["node_modules"],
+  "include": [
+    "env.d.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "compilerOptions": {
     "outDir": "build",
     "target": "esnext",
     "module": "commonjs",
-    "lib": ["esnext", "esnext.asynciterable"],
+    "lib": [
+      "esnext",
+      "esnext.asynciterable"
+    ],
     "moduleResolution": "node",
     "declaration": false,
     "composite": false,
     "strictPropertyInitialization": false,
     "strict": true,
     "esModuleInterop": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "removeComments": true,
     "noImplicitAny": true,
     "strictNullChecks": true,

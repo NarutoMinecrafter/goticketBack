@@ -23,22 +23,21 @@ export class EventService {
     event.tickets = tickets
     event.requiredAdditionalInfo = { ...defaultRequiredAdditionalInfo, ...requiredAdditionalInfo }
 
-    if (editors?.length) {
-      event.editors = await Promise.all(
-        editors.map(async editor => {
-          const user = await this.userService.getBy('id', editor)
+    event.editors = await Promise.all(
+      editors?.map(async editor => {
+        const user = await this.userService.getBy('id', editor)
 
-          if (!user) {
-            throw new BadRequestException(`User with id ${editor} is not defined!`)
-          }
+        if (!user) {
+          throw new BadRequestException(`User with id ${editor} is not defined!`)
+        }
 
-          return user
-        })
-      )
-    }
+        return user
+      }) || []
+    )
+    event.guests = []
 
     event = await this.eventRepository.save(event)
-
+    console.log(9)
     return event
   }
 
@@ -53,7 +52,9 @@ export class EventService {
   }
 
   async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
-    const events = await this.eventRepository.find()
+    const events = await this.eventRepository.find({
+      relations: ['creator', 'tickets']
+    })
 
     if (!sortBy || (sortBy === SortTypes.ByGeolocation && !userLocation)) {
       return events
@@ -82,8 +83,8 @@ export class EventService {
     return events
   }
 
-  getBy(key: keyof Event, value: Event[keyof Event]) {
-    return this.eventRepository.findOneBy({ [key]: value })
+  getBy<T extends keyof Event>(key: T, value: Event[T]) {
+    return this.eventRepository.findOne({ where: { [key]: value }, relations: ['creator', 'tickets'] })
   }
 
   async getByAuthor(authorId: number) {
@@ -110,7 +111,7 @@ export class EventService {
     }
 
     const users = await Promise.all(
-      editors.map(async editor => {
+      editors?.map(async editor => {
         const user = await this.userService.getBy('id', editor)
 
         if (!user) {
@@ -118,7 +119,7 @@ export class EventService {
         }
 
         return user
-      })
+      }) || event.editors
     )
 
     const result = await this.eventRepository.update(id, { ...dto, editors: users })

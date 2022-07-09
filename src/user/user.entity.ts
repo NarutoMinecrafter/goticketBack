@@ -46,11 +46,11 @@ export class User {
   @Column({ nullable: true })
   avatar?: string
 
-  @ApiProperty({ description: 'User events', type: () => [Event] })
+  @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)
   events: Event[]
 
-  @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest] })
+  @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest], default: [] })
   @OneToMany(() => Guest, guest => guest.event)
   guests: Guest[]
 }

@@ -1,11 +1,11 @@
 import dotenv from 'dotenv'
-import { UserService } from './../user/user.service'
+import { UserService } from '../user/user.service'
 import { TOTP } from '@otplib/core'
 import { createDigest } from '@otplib/plugin-crypto'
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { createClient, RedisClientType } from 'redis'
-import { PhoneDto, CodeDto } from './auth.dto'
+import { CodeDto, PhoneDto } from './auth.dto'
 import { CreateUserDto } from '../user/user.dto'
 import { Twilio } from 'twilio'
 

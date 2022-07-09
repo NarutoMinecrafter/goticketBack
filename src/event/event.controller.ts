@@ -25,7 +25,7 @@ export class EventController {
   @Get()
   get(@Query() { id, sortBy, userLocation }: GetEventDto) {
     if (id) {
-      return this.eventService.getBy('id', id)
+      return this.eventService.getBy('id', Number(id))
     }
 
     return this.eventService.getAll(sortBy, userLocation)

@@ -20,29 +20,33 @@ export class CreateTicketDto {
   readonly price: number
 
   @ApiProperty({ example: 250, description: 'Ticket pre-order price', required: false })
+  @Min(1)
   @IsNumber()
+  @IsOptional()
   readonly preOrderPrice: number
 
   @ApiProperty({ example: 5000, description: 'Ticket last-chance price', required: false })
+  @Min(1)
   @IsNumber()
+  @IsOptional()
   readonly lastChancePrice: number
 
   @ApiProperty({ example: 500, description: 'Quantity of tickets' })
   @Min(1)
   @IsNumber()
   @IsNotEmpty()
-  readonly totalCount!: number
+  readonly totalCount: number
 }
 
 export class BuyTicketDto {
   @ApiProperty({ example: 1, description: 'Ticket id' })
-  @IsNumber()
+  @IsNumberString()
   @IsNotEmpty()
   readonly id: number
 
   @ApiProperty({ example: 1, description: 'Quantity of tickets' })
-  @IsNumber()
   @Min(1)
+  @IsNumber()
   @IsNotEmpty()
   readonly count: number
 
@@ -53,16 +57,14 @@ export class BuyTicketDto {
 
 export class GetByTicketIdDto {
   @ApiProperty({ example: 1, description: 'Ticket id', required: true })
-  @IsString()
   @IsNumberString()
   @IsNotEmpty()
-  readonly id: number
+  readonly id: string
 }
 
 export class GetTicketDto {
   @ApiProperty({ example: 1, description: 'Ticket id', required: false })
-  @IsString()
   @IsNumberString()
   @IsOptional()
-  readonly id?: number
+  readonly id?: string
 }

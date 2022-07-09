@@ -1,10 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PartialType } from '@nestjs/swagger'
 import {
   ArrayMaxSize,
+  ArrayMinSize,
+  ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
+  IsLatLong,
   IsNotEmpty,
+  IsNotEmptyObject,
   IsNumber,
   IsNumberString,
   IsObject,
@@ -21,7 +26,7 @@ export enum SortTypes {
   ByCreateDate = 'createDate'
 }
 
-export type StringLocation = `${Location['lat']}-${Location['lon']}`
+export type StringLocation = `${Location['lat']}, ${Location['lon']}`
 
 export class CreateEventDto {
   @ApiProperty({ example: 'Comic con', description: 'Title' })
@@ -36,14 +41,17 @@ export class CreateEventDto {
 
   @ApiProperty({ example: 'Very cool anime festival', description: 'Full description', required: false })
   @IsString()
+  @IsOptional()
   readonly fullDescription: string
 
   @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Start date' })
   @IsDateString()
+  @IsNotEmpty()
   readonly startDate!: string
 
   @ApiProperty({ example: '2022-02-27T02:00:00.777Z', description: 'End date' })
   @IsDateString()
+  @IsNotEmpty()
   readonly endDate!: string
 
   @ApiProperty({ example: ['https://youtu.be/dQw4w9WgXcQ'], description: 'Demo videos or pictures', required: false })
@@ -51,28 +59,33 @@ export class CreateEventDto {
   @ArrayMaxSize(3)
   readonly demoLinks: string[]
 
-  @ApiProperty({ example: TypeEnum.Festival, description: 'Event type', enum: TypeEnum })
-  @IsEnum(TypeEnum)
-  type: TypeEnum
+  @ApiProperty({ example: [TypeEnum.Festival], isArray: true, description: 'Event type array', enum: TypeEnum })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMinSize(1)
+  type: TypeEnum[]
 
   @ApiProperty({ example: '5555', description: 'Bank account' })
   @IsString()
   @IsNotEmpty()
-  readonly bank!: string
+  readonly bank: string
 
   @ApiProperty({
     example: '302 8TH NEW YORK NY 10001-4813 USA',
-    description: 'Pretty variant of address',
-    required: true
+    description: 'Pretty variant of address'
   })
   @IsString()
   @IsNotEmpty()
-  readonly address!: string
+  readonly address: string
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
+  @IsBoolean()
+  @IsOptional()
   isPrivate: boolean
 
   @ApiProperty({ description: 'Whether the event is hidden', example: false, required: false })
+  @IsBoolean()
+  @IsOptional()
   isHidden: boolean
 
   @ApiProperty({
@@ -86,16 +99,16 @@ export class CreateEventDto {
 
   @ApiProperty({
     example: { lat: 48.187019, lon: 23.88558 },
-    description: 'Event latitude/longitude location',
-    required: true
+    description: 'Event latitude/longitude location'
   })
   @IsObject()
+  @IsNotEmptyObject()
   readonly location: Location
 
   @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
   @IsArray()
   @IsNotEmpty()
-  readonly tickets!: CreateTicketDto[]
+  readonly tickets: CreateTicketDto[]
 
   @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
   @IsArray()
@@ -111,8 +124,8 @@ export class CreateEventDto {
 export class GetEventDto {
   @ApiProperty({ example: '42', description: 'Event id', required: false })
   @IsOptional()
-  @IsString()
-  readonly id?: number
+  @IsNumberString()
+  readonly id?: string
 
   @ApiProperty({ example: SortTypes.ByDate, description: 'Sort events by value', required: false, enum: SortTypes })
   @IsOptional()
@@ -120,127 +133,37 @@ export class GetEventDto {
   readonly sortBy?: SortTypes
 
   @ApiProperty({
-    example: '52.129101-45.857929',
+    example: '52.129101, 45.857929',
     description: `User latitude/longitude location. Need for Sorting by Geolocation`,
     required: false
   })
   @IsOptional()
-  @IsString()
+  @IsLatLong()
   readonly userLocation?: StringLocation
 }
 
 export class GetByEventIdDto {
-  @ApiProperty({ example: '1', description: 'Event id', required: true })
-  @IsString()
+  @ApiProperty({ example: '1', description: 'Event id' })
   @IsNumberString()
   @IsNotEmpty()
-  readonly id!: string
-}
-
-export class GetEventByUserId {
-  @ApiProperty({ example: '69', description: 'User id', required: false })
-  @IsNumberString()
-  @IsString()
-  readonly id?: string
+  readonly id: string
 }
 
 export class BuyTicketsDto {
   @ApiProperty({ example: 1, description: 'Event id' })
   @IsNumber()
   @IsNotEmpty()
-  readonly id!: number
+  readonly id: number
 
   @ApiProperty({ type: [BuyTicketDto], description: 'Array of tickets' })
   @IsArray()
-  @IsNotEmpty()
+  @ArrayNotEmpty()
   readonly tickets!: BuyTicketDto[]
 }
 
-export class ChangeEventDto {
-  @ApiProperty({ example: 23, description: 'Event id', required: true })
+export class ChangeEventDto extends PartialType(CreateEventDto) {
+  @ApiProperty({ example: 23, description: 'Event id' })
   @IsNumber()
+  @IsNotEmpty()
   readonly id: number
-
-  @ApiProperty({ example: 'Comic con', description: 'Title', required: false })
-  @IsString()
-  @IsNotEmpty()
-  readonly name?: string
-
-  @ApiProperty({ example: 'Anime fest', description: 'Short description', required: false })
-  @IsString()
-  @IsNotEmpty()
-  readonly shortDescription?: string
-
-  @ApiProperty({ example: 'Very cool anime festival', description: 'Full description', required: false })
-  @IsString()
-  readonly fullDescription?: string
-
-  @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Start date', required: false })
-  @IsDateString()
-  readonly startDate?: string
-
-  @ApiProperty({ example: '2022-02-27T02:00:00.777Z', description: 'End date', required: false })
-  @IsDateString()
-  readonly endDate?: string
-
-  @ApiProperty({ example: ['https://youtu.be/dQw4w9WgXcQ'], description: 'Demo videos or pictures', required: false })
-  @IsArray()
-  @ArrayMaxSize(3)
-  readonly demoLinks?: string[]
-
-  @ApiProperty({ example: TypeEnum.Festival, description: 'Event type', enum: TypeEnum, required: false })
-  @IsEnum(TypeEnum)
-  readonly type?: TypeEnum
-
-  @ApiProperty({ example: '5555', description: 'Bank account', required: false })
-  @IsString()
-  @IsNotEmpty()
-  readonly bank?: string
-
-  @ApiProperty({
-    example: '302 8TH NEW YORK NY 10001-4813 USA',
-    description: 'Pretty variant of address',
-    required: false
-  })
-  @IsString()
-  @IsNotEmpty()
-  readonly address?: string
-
-  @ApiProperty({ description: 'Is private event', example: false, required: false })
-  readonly isPrivate?: boolean
-
-  @ApiProperty({ description: 'Whether the event is hidden', example: false, required: false })
-  readonly isHidden?: boolean
-
-  @ApiProperty({
-    example: () => RequiredAdditionalInfoDto,
-    description: 'Required additional info for organizers',
-    type: () => RequiredAdditionalInfoDto,
-    required: false
-  })
-  @IsObject()
-  readonly requiredAdditionalInfo?: RequiredAdditionalInfoDto
-
-  @ApiProperty({
-    example: { lat: 48.187019, lon: 23.88558 },
-    description: 'Event latitude/longitude location',
-    required: false
-  })
-  @IsObject()
-  readonly location?: Location
-
-  @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets', required: false })
-  @IsArray()
-  @IsNotEmpty()
-  readonly tickets?: CreateTicketDto[]
-
-  @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'], required: false })
-  @IsArray()
-  @IsString()
-  readonly coupons?: string[]
-
-  @ApiProperty({ description: 'Array of editors user id', example: [123, 32], required: false })
-  @IsArray()
-  @IsNumber()
-  readonly editors: number[]
 }

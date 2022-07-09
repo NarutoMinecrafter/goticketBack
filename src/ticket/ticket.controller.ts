@@ -15,6 +15,8 @@ export class TicketController {
   @ApiResponse({ type: Ticket, isArray: true, description: 'Get tickets by Event id' })
   @Get()
   get(@Query() { id }: GetTicketDto) {
+    console.log(id)
+    console.log(typeof id)
     if (id) {
       return this.ticketService.getBy('id', id)
     }

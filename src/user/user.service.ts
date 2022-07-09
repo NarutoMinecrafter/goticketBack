@@ -20,12 +20,8 @@ export class UserService {
     return this.userRepository.findOneBy({ [key]: value })
   }
 
-  async changeUser({ id, ...dto }: ChangeUserDto, user: User) {
-    if (id !== user.id) {
-      throw new Error('You can change only your own profile')
-    }
-
-    const result = await this.userRepository.update(id, dto)
+  async changeUser({ ...dto }: ChangeUserDto, user: User) {
+    const result = await this.userRepository.update(user.id, dto)
 
     return Boolean(result.affected)
   }
@@ -37,7 +33,9 @@ export class UserService {
       throw new Error('User not found')
     }
 
-    user.events.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    user.events?.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+
+    return user
   }
 
   static getUserAge(date: Date): number {
