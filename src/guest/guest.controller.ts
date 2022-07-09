@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { GetGuestDto } from './guest.dto'
 import { Guest } from './guest.entity'
@@ -12,11 +12,19 @@ export class GuestController {
   @ApiOkResponse({ type: Guest, description: 'Guest with specified id' })
   @ApiResponse({ type: Guest, isArray: true, description: 'All guests if id is not specified' })
   @Get()
-  get(@Query() { id }: GetGuestDto) {
-    if (id) {
-      return this.guestService.getBy('id', Number(id))
+  get(@Query() { id, eventId, ticketId }: GetGuestDto) {
+    if (ticketId) {
+      return this.guestService.getByTicketId(ticketId)
     }
 
-    return this.guestService.getAll()
+    if (eventId) {
+      return this.guestService.getByEventId(eventId)
+    }
+
+    if (id) {
+      return this.guestService.getBy('id', id)
+    }
+
+    throw new BadRequestException('You must specify id or eventId, or ticketId')
   }
 }

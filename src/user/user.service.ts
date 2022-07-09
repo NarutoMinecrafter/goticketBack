@@ -39,4 +39,19 @@ export class UserService {
 
     user.events.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
   }
+
+  static getUserAge(date: Date): number {
+    const now = new Date()
+    const age = now.getFullYear() - date.getFullYear()
+
+    if (now.getMonth() < date.getMonth()) {
+      return age - 1
+    }
+
+    if (now.getMonth() === date.getMonth() && now.getDate() < date.getDate()) {
+      return age - 1
+    }
+
+    return age
+  }
 }

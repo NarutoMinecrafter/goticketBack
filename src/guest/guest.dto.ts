@@ -38,10 +38,6 @@ export class AdditionalInfoDto {
 }
 
 export class CreateGuestDto {
-  @ApiProperty({ type: AdditionalInfoDto, description: 'Additional info for organizers', required: true })
-  @IsNotEmpty()
-  readonly additionalInfo!: AdditionalInfoDto
-
   @IsNotEmpty()
   user: User
 
@@ -54,5 +50,14 @@ export class CreateGuestDto {
 
 export class GetGuestDto {
   @ApiProperty({ example: '1', description: 'Guest id', required: false })
-  readonly id?: string
+  @IsNumber()
+  readonly id: number
+
+  @ApiProperty({ example: '1', description: 'Event id', required: false })
+  @IsNumber()
+  readonly eventId: number
+
+  @ApiProperty({ example: '1', description: 'Ticket id', required: false })
+  @IsNumber()
+  readonly ticketId: number
 }

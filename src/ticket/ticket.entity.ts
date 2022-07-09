@@ -13,23 +13,23 @@ export class Ticket {
   @Column({ nullable: false })
   name!: string
 
-  @ApiProperty({ description: 'Ticket price', example: 31 })
+  @ApiProperty({ description: 'Ticket regular price', example: 31 })
   @Column('int', { nullable: false })
-  price!: number
+  price: number
 
-  @ApiProperty({ description: 'Ticket minimal price', example: 30 })
+  @ApiProperty({ description: 'Ticket pre-order price', example: 30 })
   @Column('int')
-  minPrice: number
+  preOrderPrice: number
 
-  @ApiProperty({ description: 'Ticket minimal price', example: 31 })
+  @ApiProperty({ description: 'Ticket last-chance price', example: 31 })
   @Column('int')
-  maxPrice: number
+  lastChancePrice: number
 
   @ApiProperty({ description: 'Ticket service charge', example: 2 })
   @Column('int', { default: 12 })
   serviceCharge: number
 
-  @ApiProperty({ description: 'Totla count of tickets', example: 30 })
+  @ApiProperty({ description: 'Total count of tickets', example: 30 })
   @Column('int', { nullable: false })
   totalCount!: number
 
