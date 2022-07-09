@@ -13,12 +13,12 @@ export class TicketController {
   @ApiOkResponse({ type: Ticket, description: 'Get ticket by ticketId' })
   @ApiResponse({ type: Ticket, isArray: true, description: 'Get tickets by Event id' })
   @Get()
-  get(@Query() { id, ticketId }: GetTicketDto) {
-    if (ticketId) {
-      return this.ticketService.getBy('id', ticketId)
+  get(@Query() { id, eventId }: GetTicketDto) {
+    if (id) {
+      return this.ticketService.getBy('id', id)
     }
 
-    return this.ticketService.getById(id)
+    return this.ticketService.getByEventId(eventId)
   }
 
   @Get('/my')
