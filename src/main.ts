@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { Logger } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import swagger from './bootstrap/swagger'
 
 const envFound = dotenv.config()
@@ -10,11 +10,12 @@ const envFound = dotenv.config()
   const { PORT } = process.env
 
   try {
-    if (!envFound) {
+    if (envFound.error) {
       throw new Error('.env is not found')
     }
 
     const app = await NestFactory.create(AppModule)
+    app.useGlobalPipes(new ValidationPipe())
     app.enableCors()
     swagger(app)
 

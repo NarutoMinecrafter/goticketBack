@@ -4,6 +4,7 @@ import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
 import { Ticket } from './ticket.entity'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class TicketService {
@@ -16,39 +17,53 @@ export class TicketService {
     return this.ticketRepository.save(this.ticketRepository.create(dto))
   }
 
-  getAll() {
-    return this.ticketRepository.find()
-  }
-
   getBy(key: keyof Ticket, value: Ticket[keyof Ticket]) {
     return this.ticketRepository.findOneBy({ [key]: value })
+  }
+
+  getByEventId(id: number) {
+    return this.ticketRepository.createQueryBuilder('ticket').where('ticket.event.id = :id', { id }).getMany()
   }
 
   update(ticket: Partial<Ticket> & Record<'id', Ticket['id']>) {
     return this.ticketRepository.update(ticket.id, ticket)
   }
 
-  async buy({ id, count, user, event, additionalInfo }: BuyTicketDto) {
+  async buy({ id, count, user, event }: BuyTicketDto) {
     const ticket = await this.getBy('id', id)
 
     if (!ticket) {
       throw new BadRequestException(`Ticket with id ${id} is not defined!`)
     }
 
-    // TODO: remake
     const { isAgeRequired, minRequiredAge, isSexRequired, isIDCodeRequired, isInstagramRequired } =
-      ticket.requiredAdditionalInfo
-    const { name, phone, age, sex, IDcode, instagram } = additionalInfo
+      event.requiredAdditionalInfo
+    const { name, phone, sex, IDcode, instagram } = user
 
-    if (
-      !name ||
-      !phone ||
-      ((isAgeRequired || minRequiredAge) && !age) ||
-      (isSexRequired && !sex) ||
-      (isIDCodeRequired && !IDcode) ||
-      (isInstagramRequired && !instagram)
-    ) {
-      throw new BadRequestException('Some field is dont exist')
+    const age = UserService.getUserAge(user.birthdate)
+
+    if (!name) {
+      throw new BadRequestException('Name not found')
+    }
+
+    if (!phone) {
+      throw new BadRequestException('Phone not found')
+    }
+
+    if ((isAgeRequired || minRequiredAge) && !age) {
+      throw new BadRequestException('Age not found')
+    }
+
+    if (isSexRequired && !sex) {
+      throw new BadRequestException('Sex not found')
+    }
+
+    if (isIDCodeRequired && !IDcode) {
+      throw new BadRequestException('ID-Code not found')
+    }
+
+    if (isInstagramRequired && !instagram) {
+      throw new BadRequestException('Instagram not found')
     }
 
     if (minRequiredAge && age && age <= minRequiredAge) {
@@ -59,6 +74,15 @@ export class TicketService {
 
     await this.update(ticket)
 
-    return await this.guestService.create({ additionalInfo, user, event, ticket })
+    return await this.guestService.create({ user, event, ticket })
+  }
+
+  getByAuthor(id: number) {
+    return this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.editors', 'editor')
+      .where('ticket.creator.id = :id', { id })
+      .orWhere('editor.id = :id', { id })
+      .getMany()
   }
 }

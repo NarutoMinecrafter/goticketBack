@@ -3,6 +3,7 @@ import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { IsBoolean, IsNumber, Min } from 'class-validator'
 
 export enum TypeEnum {
   Music = 'Music',
@@ -18,6 +19,39 @@ export enum TypeEnum {
   Cinema = 'Cinema',
   Exhibition = 'Exhibition'
 }
+
+export class RequiredAdditionalInfoDto {
+  @ApiProperty({ description: 'Does a person have to indicate age to buy this ticket', example: true, default: false })
+  @IsBoolean()
+  isAgeRequired = false
+
+  @ApiProperty({ description: 'Minimum user age to purchase tickets', example: 18, default: 0 })
+  @Min(0)
+  @IsNumber()
+  minRequiredAge = 0
+
+  @ApiProperty({ description: 'Does a person have to indicate sex to buy this ticket', example: false, default: false })
+  @IsBoolean()
+  isSexRequired = false
+
+  @ApiProperty({
+    description: 'Does a person have to indicate ID-Code to buy this ticket',
+    example: false,
+    default: false
+  })
+  @IsBoolean()
+  isIDCodeRequired = false
+
+  @ApiProperty({
+    description: 'Does a person have to indicate instagram link to buy this ticket',
+    example: false,
+    default: false
+  })
+  @IsBoolean()
+  isInstagramRequired = false
+}
+
+export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
 
 export class Location {
   @ApiProperty({ description: 'Latitude', example: 35.7040744 })
@@ -37,19 +71,12 @@ export class Event {
   @Column({ nullable: false })
   name!: string
 
-  @ApiProperty({
-    description: 'Links to a demo or description of this event',
-    example: ['https://www.youtube.com/watch?v=d1YBv2mWll0']
-  })
-  @Column('text', { array: true, default: [] })
-  demoLinks!: string[]
-
   @ApiProperty({ description: 'Start date of this event', example: '24.08.2022' })
-  @Column('date', { nullable: false })
+  @Column('timestamptz', { nullable: false })
   startDate!: Date
 
   @ApiProperty({ description: 'End date of this event', example: '25.08.2022' })
-  @Column('date')
+  @Column('timestamptz')
   endDate: Date
 
   @ApiProperty({ description: 'Creation date of this event', example: '06.07.2022' })
@@ -68,8 +95,15 @@ export class Event {
   @Column()
   fullDescription: string
 
+  @ApiProperty({
+    description: 'Links to a demo or description of this event',
+    example: ['https://www.youtube.com/watch?v=d1YBv2mWll0']
+  })
+  @Column('text', { array: true, default: [] })
+  demoLinks!: string[]
+
   @ApiProperty({ description: 'Event type', example: TypeEnum.Festival, enum: TypeEnum })
-  @Column({ enum: TypeEnum })
+  @Column({ enum: TypeEnum, nullable: false })
   type: TypeEnum
 
   @ApiProperty({ description: 'Event location', example: () => Location, type: () => Location })
@@ -88,17 +122,29 @@ export class Event {
   @Column('bool', { default: false })
   isHidden: boolean
 
+  @ApiProperty({
+    description: 'Is some additional info required',
+    example: () => RequiredAdditionalInfoDto,
+    type: () => RequiredAdditionalInfoDto
+  })
+  @Column('json', { default: defaultRequiredAdditionalInfo })
+  requiredAdditionalInfo: RequiredAdditionalInfoDto
+
   @ApiProperty({ description: "Ticket's of this event", example: () => [Ticket], type: () => [Ticket] })
   @OneToMany(() => Ticket, ticket => ticket.event)
   tickets: Ticket[]
+
+  @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
+  @Column('text', { array: true, default: [] })
+  coupons: string[]
 
   @ApiProperty({ description: 'Creator of this event', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.events)
   creator: User
 
-  @ApiProperty({ description: 'Users of this event', example: () => [User], type: () => [User] })
+  @ApiProperty({ description: 'Users who can change event info', example: () => [User], type: () => [User] })
   @ManyToMany(() => User)
-  members: User[]
+  editors: User[]
 
   @ApiProperty({ description: "Guest's of this event", example: () => [Guest], type: () => [Guest] })
   @OneToMany(() => Guest, guest => guest.event)

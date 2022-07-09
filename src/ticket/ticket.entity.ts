@@ -2,9 +2,6 @@ import { BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedCol
 import { Event } from '../event/event.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { RequiredAdditionalInfoDto } from './ticket.dto'
-
-export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
 
 @Entity()
 export class Ticket {
@@ -16,23 +13,23 @@ export class Ticket {
   @Column({ nullable: false })
   name!: string
 
-  @ApiProperty({ description: 'Ticket price', example: 31 })
+  @ApiProperty({ description: 'Ticket regular price', example: 31 })
   @Column('int', { nullable: false })
-  price!: number
+  price: number
 
-  @ApiProperty({ description: 'Ticket minimal price', example: 30 })
+  @ApiProperty({ description: 'Ticket pre-order price', example: 30 })
   @Column('int')
-  minPrice: number
+  preOrderPrice: number
 
-  @ApiProperty({ description: 'Ticket minimal price', example: 31 })
+  @ApiProperty({ description: 'Ticket last-chance price', example: 31 })
   @Column('int')
-  maxPrice: number
+  lastChancePrice: number
 
   @ApiProperty({ description: 'Ticket service charge', example: 2 })
   @Column('int', { default: 12 })
   serviceCharge: number
 
-  @ApiProperty({ description: 'Totla count of tickets', example: 30 })
+  @ApiProperty({ description: 'Total count of tickets', example: 30 })
   @Column('int', { nullable: false })
   totalCount!: number
 
@@ -44,21 +41,9 @@ export class Ticket {
   @Column()
   type: string
 
-  @ApiProperty({
-    description: 'Is some additional info required',
-    example: () => RequiredAdditionalInfoDto,
-    type: () => RequiredAdditionalInfoDto
-  })
-  @Column('json', { default: defaultRequiredAdditionalInfo })
-  requiredAdditionalInfo: RequiredAdditionalInfoDto
-
   @ApiProperty({ description: 'Can the ticket be booked', example: 30 })
   @Column('bool', { default: false })
   canBeBooked: boolean
-
-  @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
-  @Column('text', { array: true, default: [] })
-  coupons: string[]
 
   @ApiProperty({ description: 'Event of this ticket', example: () => Event, type: () => Event })
   @ManyToOne(() => Event, event => event.tickets)
