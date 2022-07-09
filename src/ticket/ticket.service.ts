@@ -4,6 +4,7 @@ import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
 import { Ticket } from './ticket.entity'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class TicketService {
@@ -16,15 +17,11 @@ export class TicketService {
     return this.ticketRepository.save(this.ticketRepository.create(dto))
   }
 
-  getAll() {
-    return this.ticketRepository.find()
-  }
-
   getBy(key: keyof Ticket, value: Ticket[keyof Ticket]) {
     return this.ticketRepository.findOneBy({ [key]: value })
   }
 
-  getById(id: number) {
+  getByEventId(id: number) {
     return this.ticketRepository.createQueryBuilder('ticket').where('ticket.event.id = :id', { id }).getMany()
   }
 
@@ -32,7 +29,7 @@ export class TicketService {
     return this.ticketRepository.update(ticket.id, ticket)
   }
 
-  async buy({ id, count, user, event, additionalInfo }: BuyTicketDto) {
+  async buy({ id, count, user, event }: BuyTicketDto) {
     const ticket = await this.getBy('id', id)
 
     if (!ticket) {
@@ -41,7 +38,9 @@ export class TicketService {
 
     const { isAgeRequired, minRequiredAge, isSexRequired, isIDCodeRequired, isInstagramRequired } =
       event.requiredAdditionalInfo
-    const { name, phone, age, sex, IDcode, instagram } = additionalInfo
+    const { name, phone, sex, IDcode, instagram } = user
+
+    const age = UserService.getUserAge(user.birthdate)
 
     if (!name) {
       throw new BadRequestException('Name not found')
@@ -75,7 +74,7 @@ export class TicketService {
 
     await this.update(ticket)
 
-    return await this.guestService.create({ additionalInfo, user, event, ticket })
+    return await this.guestService.create({ user, event, ticket })
   }
 
   getByAuthor(id: number) {
