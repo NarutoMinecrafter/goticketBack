@@ -1,9 +1,10 @@
 import { Controller, Get, Query, Req } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { GetTicketDto } from './ticket.dto'
+import { GetByTicketIdDto, GetTicketDto } from './ticket.dto'
 import { Ticket } from './ticket.entity'
 import { TicketService } from './ticket.service'
 import { User } from '../user/user.entity'
+import { Guest } from '../guest/guest.entity'
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -13,17 +14,22 @@ export class TicketController {
   @ApiOkResponse({ type: Ticket, description: 'Get ticket by ticketId' })
   @ApiResponse({ type: Ticket, isArray: true, description: 'Get tickets by Event id' })
   @Get()
-  get(@Query() { id, eventId }: GetTicketDto) {
+  get(@Query() { id }: GetTicketDto) {
     if (id) {
       return this.ticketService.getBy('id', id)
     }
 
-    return this.ticketService.getByEventId(eventId)
+    return this.ticketService.getAll()
   }
 
   @Get('/my')
   getMyTickets(@Req() { user }: Record<'user', User>) {
     return this.ticketService.getByAuthor(user.id)
   }
-}
 
+  @ApiOkResponse({ type: Guest, description: 'Guests by ticket id' })
+  @Get('guests')
+  getGuests(@Query() { id }: GetByTicketIdDto) {
+    return this.ticketService.getGuestsById(Number(id))
+  }
+}

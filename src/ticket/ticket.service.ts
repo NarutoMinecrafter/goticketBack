@@ -17,12 +17,16 @@ export class TicketService {
     return this.ticketRepository.save(this.ticketRepository.create(dto))
   }
 
+  getAll() {
+    return this.ticketRepository.find()
+  }
+
   getBy(key: keyof Ticket, value: Ticket[keyof Ticket]) {
     return this.ticketRepository.findOneBy({ [key]: value })
   }
 
-  getByEventId(id: number) {
-    return this.ticketRepository.createQueryBuilder('ticket').where('ticket.event.id = :id', { id }).getMany()
+  getGuestsById(id: number) {
+    return this.getBy('id', id).then(ticket => ticket?.guests)
   }
 
   update(ticket: Partial<Ticket> & Record<'id', Ticket['id']>) {
