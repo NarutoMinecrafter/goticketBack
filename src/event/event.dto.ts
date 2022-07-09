@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { ArrayMaxSize, IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsObject, IsString } from 'class-validator'
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsNumberString,
+  IsObject,
+  IsOptional,
+  IsString
+} from 'class-validator'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
 import { Location, RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
 
@@ -88,21 +99,23 @@ export class CreateEventDto {
 
   @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
   @IsArray()
-  @IsString()
-  readonly coupons: string[]
+  @IsOptional()
+  readonly coupons?: string[]
 
   @ApiProperty({ description: 'Array of editors user id', example: [123, 32], required: false })
   @IsArray()
-  @IsNumber()
-  readonly editors: number[]
+  @IsOptional()
+  readonly editors?: number[]
 }
 
 export class GetEventDto {
   @ApiProperty({ example: '42', description: 'Event id', required: false })
+  @IsOptional()
   @IsString()
   readonly id?: number
 
   @ApiProperty({ example: SortTypes.ByDate, description: 'Sort events by value', required: false, enum: SortTypes })
+  @IsOptional()
   @IsEnum(SortTypes)
   readonly sortBy?: SortTypes
 
@@ -111,12 +124,22 @@ export class GetEventDto {
     description: `User latitude/longitude location. Need for Sorting by Geolocation`,
     required: false
   })
+  @IsOptional()
   @IsString()
   readonly userLocation?: StringLocation
 }
 
+export class GetByEventIdDto {
+  @ApiProperty({ example: '1', description: 'Event id', required: true })
+  @IsString()
+  @IsNumberString()
+  @IsNotEmpty()
+  readonly id!: string
+}
+
 export class GetEventByUserId {
   @ApiProperty({ example: '69', description: 'User id', required: false })
+  @IsNumberString()
   @IsString()
   readonly id?: string
 }

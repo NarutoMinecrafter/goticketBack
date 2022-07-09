@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsPhoneNumber, IsString } from 'class-validator'
 import { Event } from '../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { SexEnum } from '../user/user.dto'
@@ -50,14 +50,7 @@ export class CreateGuestDto {
 
 export class GetGuestDto {
   @ApiProperty({ example: '1', description: 'Guest id', required: false })
-  @IsNumber()
-  readonly id: number
-
-  @ApiProperty({ example: '1', description: 'Event id', required: false })
-  @IsNumber()
-  readonly eventId: number
-
-  @ApiProperty({ example: '1', description: 'Ticket id', required: false })
-  @IsNumber()
-  readonly ticketId: number
+  @IsOptional()
+  @IsNumberString()
+  readonly id?: string
 }

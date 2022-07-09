@@ -43,6 +43,7 @@ export class CreateUserDto {
 
 export class GetUserDto {
   @ApiProperty({ example: 1, description: 'User id', required: false })
+  @IsOptional()
   readonly id?: number
 }
 

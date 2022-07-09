@@ -1,11 +1,12 @@
 import { Guest } from '../guest/guest.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto } from './event.dto'
+import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetByEventIdDto, GetEventDto } from './event.dto'
 import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { User } from '../user/user.entity'
 import { Event } from './event.entity'
+import { Ticket } from '../ticket/ticket.entity'
 
 @ApiTags('Event')
 @Controller('event')
@@ -35,6 +36,18 @@ export class EventController {
   @Get('/me')
   getMyEvents(@Req() { user }: Record<'user', User>) {
     return this.eventService.getByAuthor(user.id)
+  }
+
+  @ApiOkResponse({ type: Ticket, description: 'Tickets by event id' })
+  @Get('tickets')
+  getTickets(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.getTicketsById(Number(id))
+  }
+
+  @ApiOkResponse({ type: Guest, description: 'Guests by event id' })
+  @Get('guests')
+  getGuests(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.getGuestsById(Number(id))
   }
 
   @UseGuards(JwtAuthGuard)

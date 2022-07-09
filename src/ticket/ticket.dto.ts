@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Min } from 'class-validator'
 import { Event } from '../event/event.entity'
 import { User } from '../user/user.entity'
 
@@ -51,10 +51,18 @@ export class BuyTicketDto {
   readonly event: Event
 }
 
+export class GetByTicketIdDto {
+  @ApiProperty({ example: 1, description: 'Ticket id', required: true })
+  @IsString()
+  @IsNumberString()
+  @IsNotEmpty()
+  readonly id: number
+}
+
 export class GetTicketDto {
   @ApiProperty({ example: 1, description: 'Ticket id', required: false })
-  readonly id: number
-
-  @ApiProperty({ example: 123, description: 'Event id' })
-  readonly eventId: number
+  @IsString()
+  @IsNumberString()
+  @IsOptional()
+  readonly id?: number
 }

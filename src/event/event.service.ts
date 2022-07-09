@@ -22,17 +22,20 @@ export class EventService {
     event.creator = user
     event.tickets = tickets
     event.requiredAdditionalInfo = { ...defaultRequiredAdditionalInfo, ...requiredAdditionalInfo }
-    event.editors = await Promise.all(
-      editors.map(async editor => {
-        const user = await this.userService.getBy('id', editor)
 
-        if (!user) {
-          throw new BadRequestException(`User with id ${editor} is not defined!`)
-        }
+    if (editors?.length) {
+      event.editors = await Promise.all(
+        editors.map(async editor => {
+          const user = await this.userService.getBy('id', editor)
 
-        return user
-      })
-    )
+          if (!user) {
+            throw new BadRequestException(`User with id ${editor} is not defined!`)
+          }
+
+          return user
+        })
+      )
+    }
 
     event = await this.eventRepository.save(event)
 
@@ -85,6 +88,14 @@ export class EventService {
 
   async getByAuthor(authorId: number) {
     return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
+  }
+
+  getTicketsById(id: number) {
+    return this.getBy('id', id).then(event => event?.tickets)
+  }
+
+  getGuestsById(id: number) {
+    return this.getBy('id', id).then(event => event?.guests)
   }
 
   async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {
