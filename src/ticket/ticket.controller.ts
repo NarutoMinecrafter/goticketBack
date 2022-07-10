@@ -12,7 +12,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 export class TicketController {
   constructor(private ticketService: TicketService) {}
 
-  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: Ticket, description: 'Get ticket by ticketId' })
   @ApiResponse({ type: Ticket, isArray: true, description: 'Get tickets by Event id' })
   @Get()
@@ -31,7 +30,6 @@ export class TicketController {
     return this.ticketService.getByAuthor(user.id)
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: Guest, description: 'Guests by ticket id' })
   @Get('guests')
   getGuests(@Query() { id }: GetByTicketIdDto) {
