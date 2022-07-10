@@ -37,7 +37,6 @@ export class EventService {
     event.guests = []
 
     event = await this.eventRepository.save(event)
-    console.log(9)
     return event
   }
 
@@ -53,7 +52,7 @@ export class EventService {
 
   async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: ['creator', 'tickets']
+      relations: ['creator']
     })
 
     if (!sortBy || (sortBy === SortTypes.ByGeolocation && !userLocation)) {
@@ -84,19 +83,31 @@ export class EventService {
   }
 
   getBy<T extends keyof Event>(key: T, value: Event[T]) {
-    return this.eventRepository.findOne({ where: { [key]: value }, relations: ['creator', 'tickets'] })
+    return this.eventRepository.findOne({
+      where: { [key]: value },
+      relations: ['creator', 'tickets', 'editors', 'guests']
+    })
   }
 
   async getByAuthor(authorId: number) {
-    return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
+    // return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
+    return this.eventRepository.find({
+      where: { creator: { id: authorId } },
+      relations: ['creator', 'tickets', 'editors', 'guests']
+    })
   }
 
   getTicketsById(id: number) {
     return this.getBy('id', id).then(event => event?.tickets)
   }
 
-  getGuestsById(id: number) {
-    return this.getBy('id', id).then(event => event?.guests)
+  async getGuestsById(id: number) {
+    return this.eventRepository
+      .findOne({
+        where: { id },
+        relations: ['guests', 'guests.user']
+      })
+      .then(event => event?.guests)
   }
 
   async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {

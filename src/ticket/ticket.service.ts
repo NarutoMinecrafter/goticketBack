@@ -21,7 +21,7 @@ export class TicketService {
     return this.ticketRepository.find()
   }
 
-  getBy(key: keyof Ticket, value: Ticket[keyof Ticket]) {
+  getBy<T extends keyof Ticket>(key: T, value: Ticket[T]) {
     return this.ticketRepository.findOneBy({ [key]: value })
   }
 

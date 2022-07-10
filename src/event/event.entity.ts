@@ -1,4 +1,14 @@
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm'
 import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
@@ -146,9 +156,11 @@ export class Event {
 
   @ApiProperty({ description: 'Users who can change event info', example: () => [User], type: () => [User] })
   @ManyToMany(() => User)
+  @JoinTable()
   editors: User[]
 
   @ApiProperty({ description: "Guest's of this event", example: () => [Guest], type: () => [Guest] })
   @OneToMany(() => Guest, guest => guest.event)
+  @JoinColumn()
   guests: Guest[]
 }

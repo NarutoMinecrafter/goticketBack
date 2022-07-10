@@ -38,7 +38,11 @@ export class UserService {
     return user
   }
 
-  static getUserAge(date: Date): number {
+  static getUserAge(date?: Date): number {
+    if (!date) {
+      return 0
+    }
+
     const now = new Date()
     const age = now.getFullYear() - date.getFullYear()
 
