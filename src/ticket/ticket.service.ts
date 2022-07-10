@@ -26,7 +26,12 @@ export class TicketService {
   }
 
   getGuestsById(id: number) {
-    return this.getBy('id', id).then(ticket => ticket?.guests)
+    return this.ticketRepository
+      .findOne({
+        where: { id },
+        relations: ['guests', 'guests.user']
+      })
+      .then(event => event?.guests)
   }
 
   update(ticket: Partial<Ticket> & Record<'id', Ticket['id']>) {
@@ -84,9 +89,9 @@ export class TicketService {
   getByAuthor(id: number) {
     return this.ticketRepository
       .createQueryBuilder('ticket')
-      .leftJoinAndSelect('ticket.editors', 'editor')
-      .where('ticket.creator.id = :id', { id })
-      .orWhere('editor.id = :id', { id })
+      .leftJoinAndSelect('ticket.guests', 'guest')
+      .leftJoinAndSelect('guest.user', 'user')
+      .where('user.id = :id', { id })
       .getMany()
   }
 }
