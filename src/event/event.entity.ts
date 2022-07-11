@@ -122,6 +122,10 @@ export class Event {
   @Column('json', { nullable: false })
   location!: Location
 
+  @ApiProperty({ description: 'String address', example: 'Kyiv' })
+  @Column('text', { nullable: true })
+  address?: string
+
   @ApiProperty({ description: 'Bank Id', example: '5555' })
   @Column({ nullable: false })
   bank!: string

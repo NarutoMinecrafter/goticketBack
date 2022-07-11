@@ -7,6 +7,7 @@ import { BuyTicketsDto, ChangeEventDto, CreateEventDto, SortTypes, StringLocatio
 import { defaultRequiredAdditionalInfo, Event } from './event.entity'
 import { UserService } from '../user/user.service'
 import { getDistance } from 'geolib'
+import { getFormattedAddress } from '../utils/geolocation.utils'
 
 @Injectable()
 export class EventService {
@@ -36,6 +37,10 @@ export class EventService {
       }) || []
     )
     event.guests = []
+
+    if (dto.location) {
+      event.address = await getFormattedAddress(dto.location)
+    }
 
     event = await this.eventRepository.save(event)
     return event
@@ -139,6 +144,13 @@ export class EventService {
         return user
       }) || event.editors
     )
+
+    if (dto.location) {
+      const address = await getFormattedAddress(dto.location)
+      const result = await this.eventRepository.update(id, { ...dto, address })
+
+      return Boolean(result.affected)
+    }
 
     const result = await this.eventRepository.update(id, { ...dto, editors: users })
 
