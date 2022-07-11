@@ -26,7 +26,7 @@ export class Ticket {
   price: number
 
   @ApiProperty({ description: 'Ticket regular price', example: 31 })
-  @Column('enum', { enum: TicketStatus, nullable: false, default: TicketStatus.CANCELLED })
+  @Column('enum', { enum: TicketStatus, nullable: false, default: TicketStatus.PENDING })
   status: TicketStatus
 
   @ApiProperty({ description: 'Ticket pre-order price', example: 30 })
