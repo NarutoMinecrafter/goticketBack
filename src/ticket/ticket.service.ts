@@ -38,7 +38,7 @@ export class TicketService {
     return this.ticketRepository.update(ticket.id, ticket)
   }
 
-  async buy({ id, count, user, event }: BuyTicketDto) {
+  async buy({ id, count, user, event, isBooking }: BuyTicketDto) {
     const ticket = await this.getBy('id', id)
 
     if (!ticket) {
@@ -79,8 +79,12 @@ export class TicketService {
       throw new BadRequestException(`You must be at least ${minRequiredAge} years of age to purchase a ticket`)
     }
 
+    if (isBooking && !ticket.canBeBooked) {
+      throw new BadRequestException('This ticket is not available for booking')
+    }
+
     ticket.currentCount -= count
-    ticket.status = TicketStatus.PURCHASED
+    ticket.status = isBooking ? TicketStatus.BOOKED : TicketStatus.PURCHASED
 
     await this.update(ticket)
 

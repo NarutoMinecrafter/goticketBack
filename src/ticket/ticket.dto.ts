@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Min } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Min } from 'class-validator'
 import { Event } from '../event/event.entity'
 import { User } from '../user/user.entity'
 
@@ -36,6 +36,11 @@ export class CreateTicketDto {
   @IsNumber()
   @IsNotEmpty()
   readonly totalCount: number
+
+  @ApiProperty({ example: true, description: 'Can be booked', required: false })
+  @IsBoolean()
+  @IsOptional()
+  readonly canBeBooked?: boolean
 }
 
 export class BuyTicketDto {
@@ -49,6 +54,15 @@ export class BuyTicketDto {
   @IsNumber()
   @IsNotEmpty()
   readonly count: number
+
+  @ApiProperty({
+    example: true,
+    description: 'If true, then the ticket will be booked, not purchased',
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  readonly isBooking?: boolean
 
   readonly user: User
 

@@ -54,7 +54,7 @@ export class Ticket {
   type: string
 
   @ApiProperty({ description: 'Can the ticket be booked', example: 30 })
-  @Column('bool', { default: false })
+  @Column('bool', { default: true })
   canBeBooked: boolean
 
   @ApiProperty({ description: 'Event of this ticket', example: () => Event, type: () => Event })
