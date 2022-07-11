@@ -1,5 +1,5 @@
 import { ChangeUserDto } from './user.dto'
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
@@ -9,7 +9,13 @@ import { getFormattedAddress } from '../utils/geolocation.utils'
 export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-  create(dto: Omit<User, 'id'>) {
+  async create(dto: Omit<User, 'id'>) {
+    const existedUser = await this.userRepository.findOneBy({ phone: dto.phone })
+
+    if (existedUser) {
+      throw new BadRequestException('User already exists')
+    }
+
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
