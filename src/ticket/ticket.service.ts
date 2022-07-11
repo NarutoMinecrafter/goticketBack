@@ -89,6 +89,7 @@ export class TicketService {
   getByAuthor(id: number) {
     return this.ticketRepository
       .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.event', 'event')
       .leftJoinAndSelect('ticket.guests', 'guest')
       .leftJoinAndSelect('guest.user', 'user')
       .where('user.id = :id', { id })
