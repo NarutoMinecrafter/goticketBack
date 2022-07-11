@@ -24,7 +24,7 @@ export class UserService {
   }
 
   getBy(key: keyof User, value: User[keyof User]) {
-    return this.userRepository.findOneBy({ [key]: value })
+    return this.userRepository.findOne({ where: { [key]: value }, relations: ['events', 'guests'] })
   }
 
   async changeUser({ location, ...dto }: ChangeUserDto, user: User) {

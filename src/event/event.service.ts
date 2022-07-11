@@ -6,6 +6,7 @@ import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, SortTypes, StringLocation } from './event.dto'
 import { defaultRequiredAdditionalInfo, Event } from './event.entity'
 import { UserService } from '../user/user.service'
+import { getDistance } from 'geolib'
 
 @Injectable()
 export class EventService {
@@ -55,21 +56,27 @@ export class EventService {
       relations: ['creator']
     })
 
-    if (!sortBy || (sortBy === SortTypes.ByGeolocation && !userLocation)) {
+    if (!sortBy) {
       return events
+    }
+
+    if (!userLocation && sortBy === SortTypes.ByGeolocation) {
+      throw new BadRequestException('User location must be defined when sorting by geolocation')
     }
 
     events.sort((prev, next) => {
       switch (sortBy) {
+        case SortTypes.ByGeolocation: {
+          const [lat, lon] = userLocation!.split(', ')
+          const prevDistance = getDistance({ lat, lon }, { lat: prev.location.lat, lon: prev.location.lon })
+          const nextDistance = getDistance({ lat, lon }, { lat: next.location.lat, lon: next.location.lon })
+          return prevDistance > nextDistance ? 1 : -1
+        }
         case SortTypes.ByDate: {
           return prev.startDate.getTime() - next.startDate.getTime()
         }
         case SortTypes.ByTicketsCount: {
           return prev.tickets?.length || 0 - next.tickets?.length || 0
-        }
-        case SortTypes.ByGeolocation: {
-          // TODO: implement geolocation sorting
-          return 0
         }
         case SortTypes.ByCreateDate: {
           return new Date(prev.createDate).getTime() - new Date(next.createDate).getTime()
