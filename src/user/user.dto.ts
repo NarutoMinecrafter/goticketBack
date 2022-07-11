@@ -41,10 +41,10 @@ export class CreateUserDto {
   @IsOptional()
   readonly email: string
 
-  @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Birthday' })
+  @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Birthdate' })
   @IsOptional()
   @IsDateString()
-  readonly birthday: Date
+  readonly birthdate: Date
 
   @ApiProperty({
     example: { lat: 48.187019, lon: 23.88558 },
