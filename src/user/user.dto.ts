@@ -5,11 +5,13 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumberString,
+  IsObject,
   IsOptional,
   IsPhoneNumber,
   IsString,
   MinLength
 } from 'class-validator'
+import { Location } from '../event/event.entity'
 
 export enum SexEnum {
   Man = 'man',
@@ -43,6 +45,14 @@ export class CreateUserDto {
   @IsOptional()
   @IsDateString()
   readonly birthday: Date
+
+  @ApiProperty({
+    example: { lat: 48.187019, lon: 23.88558 },
+    description: 'User latitude/longitude location'
+  })
+  @IsObject()
+  @IsOptional()
+  readonly location: Location
 
   @ApiProperty({ example: '9999', description: 'ID code' })
   @IsNumberString()

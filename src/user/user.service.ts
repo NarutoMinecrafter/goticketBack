@@ -1,14 +1,15 @@
-import { ChangeUserDto, CreateUserDto } from './user.dto'
+import { ChangeUserDto } from './user.dto'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
+import { getFormattedAddress } from '../utils/geolocation.utils'
 
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-  create(dto: CreateUserDto) {
+  create(dto: Omit<User, 'id'>) {
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
@@ -20,7 +21,18 @@ export class UserService {
     return this.userRepository.findOneBy({ [key]: value })
   }
 
-  async changeUser({ ...dto }: ChangeUserDto, user: User) {
+  async changeUser({ location, ...dto }: ChangeUserDto, user: User) {
+    if (location) {
+      const address = await getFormattedAddress(location)
+      const result = await this.userRepository.update(user.id, {
+        location,
+        address,
+        ...dto
+      })
+
+      return Boolean(result.affected)
+    }
+
     const result = await this.userRepository.update(user.id, dto)
 
     return Boolean(result.affected)
