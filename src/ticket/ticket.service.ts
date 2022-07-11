@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
-import { Ticket } from './ticket.entity'
+import { Ticket, TicketStatus } from './ticket.entity'
 import { UserService } from '../user/user.service'
 
 @Injectable()
@@ -80,6 +80,7 @@ export class TicketService {
     }
 
     ticket.currentCount -= count
+    ticket.status = TicketStatus.PURCHASED
 
     await this.update(ticket)
 
