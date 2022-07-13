@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common'
-import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiOkResponse, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger'
 import { ChangeGuestStatusDto, GetGuestDto } from './guest.dto'
 import { Guest } from './guest.entity'
 import { GuestService } from './guest.service'
@@ -12,7 +12,11 @@ export class GuestController {
   constructor(private guestService: GuestService) {}
 
   @ApiOkResponse({ type: Guest, description: 'Guest with specified id' })
-  @ApiResponse({ type: Guest, isArray: true, description: 'All guests from event if eventId is specified' })
+  @ApiResponse({
+    type: OmitType(Guest, ['event']),
+    isArray: true,
+    description: 'All guests from event if eventId is specified'
+  })
   @Get()
   get(@Query() { id, eventId }: GetGuestDto) {
     if (id) {
