@@ -1,9 +1,19 @@
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm'
 import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsBoolean, IsNumber, Min } from 'class-validator'
+import { IsBoolean, IsLatitude, IsLongitude, IsNumber, Min } from 'class-validator'
 
 export enum TypeEnum {
   Music = 'Music',
@@ -55,9 +65,11 @@ export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
 
 export class Location {
   @ApiProperty({ description: 'Latitude', example: 35.7040744 })
+  @IsLatitude()
   lat: number
 
   @ApiProperty({ description: 'Longitude', example: 139.5577317 })
+  @IsLongitude()
   lon: number
 }
 
@@ -68,7 +80,7 @@ export class Event {
   id!: number
 
   @ApiProperty({ description: 'Event name', example: 'Independence Day of Ukraine' })
-  @Column({ nullable: false })
+  @Column('text', { nullable: false })
   name!: string
 
   @ApiProperty({ description: 'Start date of this event', example: '24.08.2022' })
@@ -84,7 +96,7 @@ export class Event {
   createDate: Date
 
   @ApiProperty({ description: 'Short event description', example: 'This is the main state holiday in modern Ukraine' })
-  @Column({ nullable: false })
+  @Column('text', { nullable: false })
   shortDescription!: string
 
   @ApiProperty({
@@ -92,7 +104,7 @@ export class Event {
     example:
       'Independence Day of Ukraine is the main state holiday in modern Ukraine, celebrated on 24 August in commemoration of the Declaration of Independence of 1991'
   })
-  @Column()
+  @Column('text')
   fullDescription: string
 
   @ApiProperty({
@@ -102,13 +114,17 @@ export class Event {
   @Column('text', { array: true, default: [] })
   demoLinks!: string[]
 
-  @ApiProperty({ description: 'Event type', example: TypeEnum.Festival, enum: TypeEnum })
-  @Column({ enum: TypeEnum, nullable: false })
-  type: TypeEnum
+  @ApiProperty({ description: 'Event type', isArray: true, example: [TypeEnum.Festival], enum: TypeEnum })
+  @Column('text', { array: true, nullable: false, default: [] })
+  type: TypeEnum[]
 
   @ApiProperty({ description: 'Event location', example: () => Location, type: () => Location })
   @Column('json', { nullable: false })
   location!: Location
+
+  @ApiProperty({ description: 'String address', example: 'Kyiv' })
+  @Column('text', { nullable: true })
+  address: string
 
   @ApiProperty({ description: 'Bank Id', example: '5555' })
   @Column({ nullable: false })
@@ -144,9 +160,11 @@ export class Event {
 
   @ApiProperty({ description: 'Users who can change event info', example: () => [User], type: () => [User] })
   @ManyToMany(() => User)
+  @JoinTable()
   editors: User[]
 
   @ApiProperty({ description: "Guest's of this event", example: () => [Guest], type: () => [Guest] })
   @OneToMany(() => Guest, guest => guest.event)
+  @JoinColumn()
   guests: Guest[]
 }

@@ -3,9 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, SortTypes, StringLocation } from './event.dto'
-import { defaultRequiredAdditionalInfo, Event } from './event.entity'
+import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes } from './event.dto'
+import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
+import { getDistance } from 'geolib'
+import { getFormattedAddress } from '../utils/geolocation.utils'
+import { sortMap } from '../utils/map.utils'
 
 @Injectable()
 export class EventService {
@@ -23,22 +26,30 @@ export class EventService {
     event.tickets = tickets
     event.requiredAdditionalInfo = { ...defaultRequiredAdditionalInfo, ...requiredAdditionalInfo }
 
-    if (editors?.length) {
-      event.editors = await Promise.all(
-        editors.map(async editor => {
-          const user = await this.userService.getBy('id', editor)
+    event.editors = await Promise.all(
+      editors?.map(async editor => {
+        const user = await this.userService.getBy('id', editor)
 
-          if (!user) {
-            throw new BadRequestException(`User with id ${editor} is not defined!`)
-          }
+        if (!user) {
+          throw new BadRequestException(`User with id ${editor} is not defined!`)
+        }
 
-          return user
-        })
-      )
+        return user
+      }) || []
+    )
+    event.guests = []
+
+    if (dto.location) {
+      const address = await getFormattedAddress(dto.location)
+
+      if (!address) {
+        throw new BadRequestException('Invalid location')
+      }
+
+      event.address = address
     }
 
     event = await this.eventRepository.save(event)
-
     return event
   }
 
@@ -52,24 +63,122 @@ export class EventService {
     return await Promise.all(tickets.map(async ticket => await this.ticketService.buy({ ...ticket, event, user })))
   }
 
-  async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
-    const events = await this.eventRepository.find()
+  async getAll({
+    sortBy,
+    userLocation,
+    isUntilDate,
+    date,
+    dateType,
+    eventType,
+    placeNearInMeters,
+    onlyInStock
+  }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
+    const events = await this.eventRepository.find({
+      relations: ['creator', 'tickets']
+    })
 
-    if (!sortBy || (sortBy === SortTypes.ByGeolocation && !userLocation)) {
-      return events
+    if (date && !dateType) {
+      throw new BadRequestException('Date type is required for date filter')
     }
 
-    events.sort((prev, next) => {
+    if (placeNearInMeters && !userLocation) {
+      throw new BadRequestException('User location is required for place near filtering')
+    }
+
+    const filteredEvents = events.filter(event => {
+      const filtered = {
+        date: true,
+        location: true,
+        type: true,
+        inStock: true
+      }
+
+      if (date && dateType) {
+        const dateTypes = dateType!.split(',')
+        const specifiedDate = new Date(date)
+
+        if (!dateTypes.includes('start') && !dateTypes.includes('creation')) {
+          throw new BadRequestException('Date type is not valid. Possible values: start, creation')
+        }
+
+        const untilDate = isUntilDate !== 'false'
+
+        if (dateTypes.includes('start')) {
+          if (untilDate) {
+            filtered.date = event.startDate.getTime() <= specifiedDate.getTime()
+          } else {
+            filtered.date =
+              event.startDate.getFullYear() === specifiedDate.getFullYear() &&
+              event.startDate.getMonth() === specifiedDate.getMonth() &&
+              event.startDate.getDate() === specifiedDate.getDate()
+          }
+        }
+
+        if (dateTypes.includes('creation')) {
+          if (untilDate) {
+            filtered.date = event.createDate.getTime() <= specifiedDate.getTime()
+          } else {
+            filtered.date =
+              event.createDate.getFullYear() === specifiedDate.getFullYear() &&
+              event.createDate.getMonth() === specifiedDate.getMonth() &&
+              event.createDate.getDate() === specifiedDate.getDate()
+          }
+        }
+      }
+
+      if (placeNearInMeters && userLocation) {
+        const [userLatitude, userLongitude] = userLocation.split(', ')
+
+        if (!userLatitude || !userLongitude) {
+          throw new BadRequestException('User location is not valid')
+        }
+
+        const distance = getDistance(
+          { latitude: event.location.lat, longitude: event.location.lon },
+          { latitude: userLatitude, longitude: userLongitude }
+        )
+
+        filtered.location = distance <= Number(placeNearInMeters)
+      }
+
+      if (eventType) {
+        const formattedType = eventType.split(',')
+
+        if (!formattedType.every(type => Object.values(TypeEnum).includes(type as TypeEnum))) {
+          throw new BadRequestException('Event type is not valid')
+        }
+
+        filtered.type = formattedType.every(type => event.type.includes(type as TypeEnum))
+      }
+
+      if (onlyInStock === 'true') {
+        filtered.inStock = event.tickets?.some(ticket => ticket.currentCount !== 0)
+      }
+
+      return Object.values(filtered).every(value => value)
+    })
+
+    if (!sortBy) {
+      return filteredEvents
+    }
+
+    if (!userLocation && sortBy === SortTypes.ByGeolocation) {
+      throw new BadRequestException('User location must be defined when sorting by geolocation')
+    }
+
+    filteredEvents.sort((prev, next) => {
       switch (sortBy) {
+        case SortTypes.ByGeolocation: {
+          const [lat, lon] = userLocation!.split(', ')
+          const prevDistance = getDistance({ lat, lon }, { lat: prev.location.lat, lon: prev.location.lon })
+          const nextDistance = getDistance({ lat, lon }, { lat: next.location.lat, lon: next.location.lon })
+          return prevDistance > nextDistance ? 1 : -1
+        }
         case SortTypes.ByDate: {
           return prev.startDate.getTime() - next.startDate.getTime()
         }
         case SortTypes.ByTicketsCount: {
           return prev.tickets?.length || 0 - next.tickets?.length || 0
-        }
-        case SortTypes.ByGeolocation: {
-          // TODO: implement geolocation sorting
-          return 0
         }
         case SortTypes.ByCreateDate: {
           return new Date(prev.createDate).getTime() - new Date(next.createDate).getTime()
@@ -79,23 +188,52 @@ export class EventService {
       return 0
     })
 
-    return events
+    return filteredEvents
   }
 
-  getBy(key: keyof Event, value: Event[keyof Event]) {
-    return this.eventRepository.findOneBy({ [key]: value })
+  getBy<T extends keyof Event>(key: T, value: Event[T]) {
+    return this.eventRepository.findOne({
+      where: { [key]: value },
+      relations: ['creator', 'tickets', 'editors', 'guests']
+    })
   }
 
   async getByAuthor(authorId: number) {
-    return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
+    // return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
+    return this.eventRepository.find({
+      where: { creator: { id: authorId } },
+      relations: ['creator', 'tickets', 'editors', 'guests']
+    })
   }
 
   getTicketsById(id: number) {
     return this.getBy('id', id).then(event => event?.tickets)
   }
 
-  getGuestsById(id: number) {
-    return this.getBy('id', id).then(event => event?.guests)
+  async getGuestsById(id: number) {
+    return this.eventRepository
+      .findOne({
+        where: { id },
+        relations: ['guests', 'guests.user']
+      })
+      .then(event => event?.guests)
+  }
+
+  async getPopularLocation(limit = 5) {
+    const events = await this.eventRepository.find({ select: ['address'] })
+
+    const cities = events.map(event => event.address.split(',')[0])
+
+    const count = new Map<string, number>()
+
+    cities.forEach(city => {
+      count.set(city, (count.get(city) || 0) + 1)
+    })
+
+    const sortedCount = sortMap(count, (prev, next) => prev - next)
+    const locations = [...sortedCount.keys()]
+
+    return locations.slice(0, limit)
   }
 
   async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {
@@ -105,12 +243,12 @@ export class EventService {
       throw new BadRequestException(`Event with id ${id} is not defined!`)
     }
 
-    if (event.creator.id !== user.id || !event.editors.some(editor => editor.id === user.id)) {
+    if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
       throw new BadRequestException('You do not have permission to edit this event')
     }
 
     const users = await Promise.all(
-      editors.map(async editor => {
+      editors?.map(async editor => {
         const user = await this.userService.getBy('id', editor)
 
         if (!user) {
@@ -118,8 +256,15 @@ export class EventService {
         }
 
         return user
-      })
+      }) || event.editors
     )
+
+    if (dto.location) {
+      const address = await getFormattedAddress(dto.location)
+      const result = await this.eventRepository.update(id, { ...dto, address })
+
+      return Boolean(result.affected)
+    }
 
     const result = await this.eventRepository.update(id, { ...dto, editors: users })
 

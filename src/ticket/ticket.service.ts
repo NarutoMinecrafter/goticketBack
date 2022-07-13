@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
-import { Ticket } from './ticket.entity'
+import { Ticket, TicketStatus } from './ticket.entity'
 import { UserService } from '../user/user.service'
 
 @Injectable()
@@ -21,19 +21,24 @@ export class TicketService {
     return this.ticketRepository.find()
   }
 
-  getBy(key: keyof Ticket, value: Ticket[keyof Ticket]) {
+  getBy<T extends keyof Ticket>(key: T, value: Ticket[T]) {
     return this.ticketRepository.findOneBy({ [key]: value })
   }
 
   getGuestsById(id: number) {
-    return this.getBy('id', id).then(ticket => ticket?.guests)
+    return this.ticketRepository
+      .findOne({
+        where: { id },
+        relations: ['guests', 'guests.user']
+      })
+      .then(event => event?.guests)
   }
 
   update(ticket: Partial<Ticket> & Record<'id', Ticket['id']>) {
     return this.ticketRepository.update(ticket.id, ticket)
   }
 
-  async buy({ id, count, user, event }: BuyTicketDto) {
+  async buy({ id, count, user, event, isBooking }: BuyTicketDto) {
     const ticket = await this.getBy('id', id)
 
     if (!ticket) {
@@ -74,7 +79,12 @@ export class TicketService {
       throw new BadRequestException(`You must be at least ${minRequiredAge} years of age to purchase a ticket`)
     }
 
+    if (isBooking && !ticket.canBeBooked) {
+      throw new BadRequestException('This ticket is not available for booking')
+    }
+
     ticket.currentCount -= count
+    ticket.status = isBooking ? TicketStatus.BOOKED : TicketStatus.PURCHASED
 
     await this.update(ticket)
 
@@ -84,9 +94,10 @@ export class TicketService {
   getByAuthor(id: number) {
     return this.ticketRepository
       .createQueryBuilder('ticket')
-      .leftJoinAndSelect('ticket.editors', 'editor')
-      .where('ticket.creator.id = :id', { id })
-      .orWhere('editor.id = :id', { id })
+      .leftJoinAndSelect('ticket.event', 'event')
+      .leftJoinAndSelect('ticket.guests', 'guest')
+      .leftJoinAndSelect('guest.user', 'user')
+      .where('user.id = :id', { id })
       .getMany()
   }
 }

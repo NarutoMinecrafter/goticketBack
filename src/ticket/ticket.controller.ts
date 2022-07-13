@@ -1,10 +1,11 @@
-import { Controller, Get, Query, Req } from '@nestjs/common'
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { GetByTicketIdDto, GetTicketDto } from './ticket.dto'
 import { Ticket } from './ticket.entity'
 import { TicketService } from './ticket.service'
 import { User } from '../user/user.entity'
 import { Guest } from '../guest/guest.entity'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -16,12 +17,14 @@ export class TicketController {
   @Get()
   get(@Query() { id }: GetTicketDto) {
     if (id) {
-      return this.ticketService.getBy('id', id)
+      return this.ticketService.getBy('id', Number(id))
     }
 
     return this.ticketService.getAll()
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: Ticket, isArray: true, description: 'Get user tickets' })
   @Get('/my')
   getMyTickets(@Req() { user }: Record<'user', User>) {
     return this.ticketService.getByAuthor(user.id)

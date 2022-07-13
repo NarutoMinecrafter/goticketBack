@@ -3,6 +3,14 @@ import { Event } from '../event/event.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
 
+export enum TicketStatus {
+  PENDING = 'pending',
+  BOOKED = 'booked',
+  CANCELLED = 'cancelled',
+  DECLINED = 'declined',
+  PURCHASED = 'purchased'
+}
+
 @Entity()
 export class Ticket {
   @ApiProperty({ description: 'Ticket id', example: 300 })
@@ -16,6 +24,10 @@ export class Ticket {
   @ApiProperty({ description: 'Ticket regular price', example: 31 })
   @Column('int', { nullable: false })
   price: number
+
+  @ApiProperty({ description: 'Ticket regular price', example: 31 })
+  @Column('enum', { enum: TicketStatus, nullable: false, default: TicketStatus.PENDING })
+  status: TicketStatus
 
   @ApiProperty({ description: 'Ticket pre-order price', example: 30 })
   @Column('int')
@@ -42,7 +54,7 @@ export class Ticket {
   type: string
 
   @ApiProperty({ description: 'Can the ticket be booked', example: 30 })
-  @Column('bool', { default: false })
+  @Column('bool', { default: true })
   canBeBooked: boolean
 
   @ApiProperty({ description: 'Event of this ticket', example: () => Event, type: () => Event })

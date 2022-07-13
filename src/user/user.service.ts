@@ -1,14 +1,21 @@
-import { ChangeUserDto, CreateUserDto } from './user.dto'
-import { Injectable } from '@nestjs/common'
+import { ChangeUserDto } from './user.dto'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
+import { getFormattedAddress } from '../utils/geolocation.utils'
 
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
-  create(dto: CreateUserDto) {
+  async create(dto: Omit<User, 'id'>) {
+    const existedUser = await this.userRepository.findOneBy({ phone: dto.phone })
+
+    if (existedUser) {
+      throw new BadRequestException('User already exists')
+    }
+
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
@@ -17,15 +24,22 @@ export class UserService {
   }
 
   getBy(key: keyof User, value: User[keyof User]) {
-    return this.userRepository.findOneBy({ [key]: value })
+    return this.userRepository.findOne({ where: { [key]: value }, relations: ['events', 'guests'] })
   }
 
-  async changeUser({ id, ...dto }: ChangeUserDto, user: User) {
-    if (id !== user.id) {
-      throw new Error('You can change only your own profile')
+  async changeUser({ location, ...dto }: ChangeUserDto, user: User) {
+    if (location) {
+      const address = await getFormattedAddress(location)
+      const result = await this.userRepository.update(user.id, {
+        location,
+        address,
+        ...dto
+      })
+
+      return Boolean(result.affected)
     }
 
-    const result = await this.userRepository.update(id, dto)
+    const result = await this.userRepository.update(user.id, dto)
 
     return Boolean(result.affected)
   }
@@ -37,10 +51,16 @@ export class UserService {
       throw new Error('User not found')
     }
 
-    user.events.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    user.events?.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+
+    return user
   }
 
-  static getUserAge(date: Date): number {
+  static getUserAge(date?: Date): number {
+    if (!date) {
+      return 0
+    }
+
     const now = new Date()
     const age = now.getFullYear() - date.getFullYear()
 

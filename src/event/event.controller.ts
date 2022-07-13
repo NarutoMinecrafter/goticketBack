@@ -1,5 +1,12 @@
 import { Guest } from '../guest/guest.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetByEventIdDto, GetEventDto } from './event.dto'
+import {
+  BuyTicketsDto,
+  ChangeEventDto,
+  CreateEventDto,
+  GetByEventIdDto,
+  GetEventDto,
+  GetPopularLocation
+} from './event.dto'
 import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
@@ -23,12 +30,25 @@ export class EventController {
   @ApiOkResponse({ type: Event, description: 'Event with specified id' })
   @ApiResponse({ type: Event, isArray: true, description: 'All events if id is not specified' })
   @Get()
-  get(@Query() { id, sortBy, userLocation }: GetEventDto) {
+  get(@Query() { id, ...dto }: GetEventDto) {
     if (id) {
-      return this.eventService.getBy('id', id)
+      return this.eventService.getBy('id', Number(id))
     }
 
-    return this.eventService.getAll(sortBy, userLocation)
+    return this.eventService.getAll(dto)
+  }
+
+  @ApiResponse({
+    isArray: true,
+    schema: {
+      type: 'string',
+      example: ['Kyiv', 'Lviv', 'Odessa']
+    },
+    description: 'Get popular locations'
+  })
+  @Get('/popular-locations')
+  getPopularLocations(@Query() { limit }: GetPopularLocation) {
+    return this.eventService.getPopularLocation(limit || 5)
   }
 
   @UseGuards(JwtAuthGuard)

@@ -15,7 +15,7 @@ export class UserController {
   @Get()
   get(@Query() { id }: GetUserDto) {
     if (id) {
-      return this.userService.getById(id)
+      return this.userService.getById(Number(id))
     }
 
     return this.userService.getAll()
@@ -25,7 +25,7 @@ export class UserController {
   @ApiOkResponse({ type: User, description: 'Current user' })
   @Get('/profile')
   profile(@Req() { user }: Record<'user', User>) {
-    return user
+    return this.userService.getBy('id', user.id)
   }
 
   @UseGuards(JwtAuthGuard)

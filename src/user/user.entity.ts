@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import { Event } from '../event/event.entity'
+import { Event, Location } from '../event/event.entity'
 import { SexEnum } from './user.dto'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
@@ -8,15 +8,15 @@ import { ApiProperty } from '@nestjs/swagger'
 export class User {
   @ApiProperty({ description: 'User id', example: '1337' })
   @PrimaryGeneratedColumn()
-  id!: number
+  id: number
 
   @ApiProperty({ description: 'User name', example: 'Kirill' })
   @Column({ nullable: false })
-  name!: string
+  name: string
 
   @ApiProperty({ description: 'User surname', example: 'Baranov' })
   @Column({ nullable: false })
-  surname!: string
+  surname: string
 
   @ApiProperty({ description: 'User phone', example: '+380984556565' })
   @Column({ unique: true, nullable: false })
@@ -24,15 +24,23 @@ export class User {
 
   @ApiProperty({ description: 'User email', example: 'J3BA1T3D' })
   @Column({ unique: true })
-  email: string
+  email?: string
 
   @ApiProperty({ description: 'User birthdate', example: '25.01.1978' })
   @Column('timestamptz', { nullable: true })
-  birthdate: Date
+  birthdate?: Date
 
   @ApiProperty({ description: 'User ID Code', example: '228' })
   @Column({ unique: true })
-  IDcode: string
+  IDcode?: string
+
+  @ApiProperty({ description: 'String address', example: 'Kiyiv' })
+  @Column('text', { nullable: true })
+  address?: string
+
+  @ApiProperty({ description: 'User lat-lon location', example: () => Location, type: () => Location })
+  @Column('json', { nullable: true })
+  location?: Location
 
   @ApiProperty({ description: 'User instagram link', example: 'https://www.instagram.com/zelenskiy_official/' })
   @Column({ unique: true, nullable: true })
@@ -46,11 +54,11 @@ export class User {
   @Column({ nullable: true })
   avatar?: string
 
-  @ApiProperty({ description: 'User events', type: () => [Event] })
+  @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)
-  events: Event[]
+  events?: Event[]
 
-  @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest] })
+  @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest], default: [] })
   @OneToMany(() => Guest, guest => guest.event)
-  guests: Guest[]
+  guests?: Guest[]
 }
