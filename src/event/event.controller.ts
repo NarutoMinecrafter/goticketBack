@@ -1,5 +1,12 @@
 import { Guest } from '../guest/guest.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetByEventIdDto, GetEventDto } from './event.dto'
+import {
+  BuyTicketsDto,
+  ChangeEventDto,
+  CreateEventDto,
+  GetByEventIdDto,
+  GetEventDto,
+  GetPopularLocation
+} from './event.dto'
 import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { EventService } from './event.service'
@@ -40,8 +47,8 @@ export class EventController {
     description: 'Get popular locations'
   })
   @Get('/popular-locations')
-  getPopularLocations() {
-    return this.eventService.getPopularLocation()
+  getPopularLocations(@Query() { limit }: GetPopularLocation) {
+    return this.eventService.getPopularLocation(limit || 5)
   }
 
   @UseGuards(JwtAuthGuard)

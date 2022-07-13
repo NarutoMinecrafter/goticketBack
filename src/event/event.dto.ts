@@ -217,8 +217,15 @@ export class BuyTicketsDto {
 }
 
 export class ChangeEventDto extends PartialType(CreateEventDto) {
-  @ApiProperty({ example: 23, description: "Event id" })
+  @ApiProperty({ example: 23, description: 'Event id' })
   @IsNumber()
   @IsNotEmpty()
-  readonly id: number;
+  readonly id: number
+}
+
+export class GetPopularLocation {
+  @ApiProperty({ example: 10, description: "Limit. Default: 5" })
+  @IsNumber()
+  @IsOptional()
+  readonly limit: number;
 }
