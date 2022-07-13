@@ -124,7 +124,7 @@ export class Event {
 
   @ApiProperty({ description: 'String address', example: 'Kyiv' })
   @Column('text', { nullable: true })
-  address?: string
+  address: string
 
   @ApiProperty({ description: 'Bank Id', example: '5555' })
   @Column({ nullable: false })

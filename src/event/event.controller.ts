@@ -31,6 +31,19 @@ export class EventController {
     return this.eventService.getAll(dto)
   }
 
+  @ApiResponse({
+    isArray: true,
+    schema: {
+      type: 'string',
+      example: ['Kyiv', 'Lviv', 'Odessa']
+    },
+    description: 'Get popular locations'
+  })
+  @Get('/popular-locations')
+  getPopularLocations() {
+    return this.eventService.getPopularLocation()
+  }
+
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: User, isArray: true, description: 'Current user events' })
   @Get('/me')

@@ -8,6 +8,7 @@ import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
 import { getDistance } from 'geolib'
 import { getFormattedAddress } from '../utils/geolocation.utils'
+import { sortMap } from '../utils/map.utils'
 
 @Injectable()
 export class EventService {
@@ -39,7 +40,13 @@ export class EventService {
     event.guests = []
 
     if (dto.location) {
-      event.address = await getFormattedAddress(dto.location)
+      const address = await getFormattedAddress(dto.location)
+
+      if (!address) {
+        throw new BadRequestException('Invalid location')
+      }
+
+      event.address = address
     }
 
     event = await this.eventRepository.save(event)
@@ -212,6 +219,23 @@ export class EventService {
       .then(event => event?.guests)
   }
 
+  async getPopularLocation(limit = 5) {
+    const events = await this.eventRepository.find({ select: ['address'] })
+
+    const cities = events.map(event => event.address.split(',')[0])
+
+    const count = new Map<string, number>()
+
+    cities.forEach(city => {
+      count.set(city, (count.get(city) || 0) + 1)
+    })
+
+    const sortedCount = sortMap(count, (prev, next) => prev - next)
+    const locations = [...sortedCount.keys()]
+
+    return locations.slice(0, limit)
+  }
+
   async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {
     const event = await this.getBy('id', id)
 
@@ -219,7 +243,7 @@ export class EventService {
       throw new BadRequestException(`Event with id ${id} is not defined!`)
     }
 
-    if (event.creator.id !== user.id || !event.editors.some(editor => editor.id === user.id)) {
+    if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
       throw new BadRequestException('You do not have permission to edit this event')
     }
 
