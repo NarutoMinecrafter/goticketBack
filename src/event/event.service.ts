@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, SortTypes, StringLocation } from './event.dto'
-import { defaultRequiredAdditionalInfo, Event } from './event.entity'
+import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes } from './event.dto'
+import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
 import { getDistance } from 'geolib'
 import { getFormattedAddress } from '../utils/geolocation.utils'
@@ -56,20 +56,110 @@ export class EventService {
     return await Promise.all(tickets.map(async ticket => await this.ticketService.buy({ ...ticket, event, user })))
   }
 
-  async getAll(sortBy?: SortTypes, userLocation?: StringLocation): Promise<Event[]> {
+  async getAll({
+    sortBy,
+    userLocation,
+    isUntilDate,
+    date,
+    dateType,
+    eventType,
+    placeNearInMeters,
+    onlyInStock
+  }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: ['creator']
+      relations: ['creator', 'tickets']
+    })
+
+    if (date && !dateType) {
+      throw new BadRequestException('Date type is required for date filter')
+    }
+
+    if (placeNearInMeters && !userLocation) {
+      throw new BadRequestException('User location is required for place near filtering')
+    }
+
+    const filteredEvents = events.filter(event => {
+      const filtered = {
+        date: true,
+        location: true,
+        type: true,
+        inStock: true
+      }
+
+      if (date && dateType) {
+        const dateTypes = dateType!.split(',')
+        const specifiedDate = new Date(date)
+
+        if (!dateTypes.includes('start') && !dateTypes.includes('creation')) {
+          throw new BadRequestException('Date type is not valid. Possible values: start, creation')
+        }
+
+        const untilDate = isUntilDate !== 'false'
+
+        if (dateTypes.includes('start')) {
+          if (untilDate) {
+            filtered.date = event.startDate.getTime() <= specifiedDate.getTime()
+          } else {
+            filtered.date =
+              event.startDate.getFullYear() === specifiedDate.getFullYear() &&
+              event.startDate.getMonth() === specifiedDate.getMonth() &&
+              event.startDate.getDate() === specifiedDate.getDate()
+          }
+        }
+
+        if (dateTypes.includes('creation')) {
+          if (untilDate) {
+            filtered.date = event.createDate.getTime() <= specifiedDate.getTime()
+          } else {
+            filtered.date =
+              event.createDate.getFullYear() === specifiedDate.getFullYear() &&
+              event.createDate.getMonth() === specifiedDate.getMonth() &&
+              event.createDate.getDate() === specifiedDate.getDate()
+          }
+        }
+      }
+
+      if (placeNearInMeters && userLocation) {
+        const [userLatitude, userLongitude] = userLocation.split(', ')
+
+        if (!userLatitude || !userLongitude) {
+          throw new BadRequestException('User location is not valid')
+        }
+
+        const distance = getDistance(
+          { latitude: event.location.lat, longitude: event.location.lon },
+          { latitude: userLatitude, longitude: userLongitude }
+        )
+
+        filtered.location = distance <= Number(placeNearInMeters)
+      }
+
+      if (eventType) {
+        const formattedType = eventType.split(',')
+
+        if (!formattedType.every(type => Object.values(TypeEnum).includes(type as TypeEnum))) {
+          throw new BadRequestException('Event type is not valid')
+        }
+
+        filtered.type = formattedType.every(type => event.type.includes(type as TypeEnum))
+      }
+
+      if (onlyInStock === 'true') {
+        filtered.inStock = event.tickets?.some(ticket => ticket.currentCount !== 0)
+      }
+
+      return Object.values(filtered).every(value => value)
     })
 
     if (!sortBy) {
-      return events
+      return filteredEvents
     }
 
     if (!userLocation && sortBy === SortTypes.ByGeolocation) {
       throw new BadRequestException('User location must be defined when sorting by geolocation')
     }
 
-    events.sort((prev, next) => {
+    filteredEvents.sort((prev, next) => {
       switch (sortBy) {
         case SortTypes.ByGeolocation: {
           const [lat, lon] = userLocation!.split(', ')
@@ -91,7 +181,7 @@ export class EventService {
       return 0
     })
 
-    return events
+    return filteredEvents
   }
 
   getBy<T extends keyof Event>(key: T, value: Event[T]) {

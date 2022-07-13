@@ -23,12 +23,12 @@ export class EventController {
   @ApiOkResponse({ type: Event, description: 'Event with specified id' })
   @ApiResponse({ type: Event, isArray: true, description: 'All events if id is not specified' })
   @Get()
-  get(@Query() { id, sortBy, userLocation }: GetEventDto) {
+  get(@Query() { id, ...dto }: GetEventDto) {
     if (id) {
       return this.eventService.getBy('id', Number(id))
     }
 
-    return this.eventService.getAll(sortBy, userLocation)
+    return this.eventService.getAll(dto)
   }
 
   @UseGuards(JwtAuthGuard)

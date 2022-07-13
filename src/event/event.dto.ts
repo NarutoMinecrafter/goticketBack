@@ -5,6 +5,7 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
+  IsBooleanString,
   IsDateString,
   IsEnum,
   IsLatLong,
@@ -140,6 +141,60 @@ export class GetEventDto {
   @IsOptional()
   @IsLatLong()
   readonly userLocation?: StringLocation
+
+  @ApiProperty({
+    example: '2022-02-24T02:00:00.777Z',
+    description: `Filter by date`,
+    required: false
+  })
+  @IsDateString()
+  @IsOptional()
+  readonly date?: string
+
+  @ApiProperty({
+    example: 'false',
+    description: `Specify whether to sort exactly by the specified date or until the specified date`,
+    required: false
+  })
+  @IsBooleanString()
+  @IsOptional()
+  readonly isUntilDate?: string
+
+  @ApiProperty({
+    example: 'start,creation',
+    description: `Types of date(creation or/and start), separated by comma`,
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  readonly dateType?: string
+
+  @ApiProperty({
+    example: 100,
+    description: `Filter by place`,
+    required: false
+  })
+  @IsNumberString()
+  @IsOptional()
+  readonly placeNearInMeters?: string
+
+  @ApiProperty({
+    example: 'Music,Concert',
+    description: `Filter by type. Type must be comma separated`,
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  readonly eventType?: string
+
+  @ApiProperty({
+    example: 'false',
+    description: `Filter by only in stock tickets`,
+    required: false
+  })
+  @IsBooleanString()
+  @IsOptional()
+  readonly onlyInStock?: string
 }
 
 export class GetByEventIdDto {
@@ -162,8 +217,8 @@ export class BuyTicketsDto {
 }
 
 export class ChangeEventDto extends PartialType(CreateEventDto) {
-  @ApiProperty({ example: 23, description: 'Event id' })
+  @ApiProperty({ example: 23, description: "Event id" })
   @IsNumber()
   @IsNotEmpty()
-  readonly id: number
+  readonly id: number;
 }
