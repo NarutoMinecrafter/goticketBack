@@ -1,9 +1,9 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { IsEnum, IsNotEmpty, IsNumber, IsNumberString } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional } from 'class-validator'
 import { Event } from '../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { User } from '../user/user.entity'
-import { GuestStatus } from './guest.entity'
+import { GuestStatus, PaymentStatus } from './guest.entity'
 
 export class CreateGuestDto {
   @IsNotEmpty()
@@ -14,6 +14,9 @@ export class CreateGuestDto {
 
   @IsNotEmpty()
   ticket: Ticket
+
+  @IsOptional()
+  paymentStatus?: PaymentStatus
 }
 
 export class RequiredGuestDto {

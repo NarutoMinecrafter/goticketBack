@@ -55,3 +55,49 @@ export interface CardDto {
   cardExpiry: string
   cardCVV: string
 }
+
+export interface SendTransactionDto {
+  transactionSum: number
+  token: TokenType
+  cardCVV: string
+}
+
+export interface SendTransactionResponse {
+  HasError: boolean
+  ReturnCode: number
+  ReturnMessage: string
+  CardNumber: string
+  ExpDate_MMYY: string
+  CVV: string
+  CardName: string
+  CardIssuerCode: string
+  CardFinancerCode: string
+  CardBrandCode: string
+  ReferenceNumber: number
+  VoucherNumber: string
+  ApprovalNumber: string
+  ApprovalType: string
+  NotePrintData: string
+  NotePrintDataSeller: null
+  ResultRecord: string
+  IntOt_JSON: string
+  IntOt: string
+  TraceGUID: null
+  IsTelApprovalNeeded: boolean
+  Token: string
+  Logs: any[]
+  ClientReciept: null
+  SellerReciept: null
+  ClientRecieptPP: null
+  SellerRecieptPP: null
+  SignatureData: string
+  DspBalance: null
+  PinpadCommunication: object
+  IntIns: object
+  IsPinpadRequested: boolean
+  ZCreditInvoiceReceiptResponse: null
+  ZCreditPinpadReport: object
+  NoteLink: null
+  PanEntryMode: string
+  PaymentMethod: number
+}

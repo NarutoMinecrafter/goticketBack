@@ -27,22 +27,30 @@ export class UserService {
 
   getAll() {
     return this.userRepository.find().then(users => {
-      users.map(user => (user.payments = []))
+      users.map(user => ({ ...user, payments: [] }))
     })
   }
 
-  getBy(key: keyof User, value: User[keyof User]) {
+  getBy(key: keyof User, value: User[keyof User], includePayments?: boolean) {
     return this.userRepository.findOne({ where: { [key]: value }, relations: ['events', 'guests'] }).then(user => {
       if (!user) {
         return null
       }
 
-      user.payments = user.payments!.map(payment => ({
+      if (includePayments) {
+        console.log('payments')
+        console.log(user)
+        return user
+      }
+
+      const newUser = { ...user }
+
+      newUser.payments = user.payments!.map(payment => ({
         formattedCardNumber: payment.formattedCardNumber,
         paymentCardHolder: payment.paymentCardHolder
       }))
 
-      return user
+      return newUser
     })
   }
 

@@ -1,5 +1,13 @@
 import axios, { AxiosInstance } from 'axios'
-import { CardDto, CardNumberType, GetTokenData, TokenType, ValidateToken } from '../types/payment.types'
+import {
+  CardDto,
+  CardNumberType,
+  GetTokenData,
+  SendTransactionDto,
+  SendTransactionResponse,
+  TokenType,
+  ValidateToken
+} from '../types/payment.types'
 
 export class PaymentUtils {
   private readonly paymentRequest: AxiosInstance
@@ -34,6 +42,17 @@ export class PaymentUtils {
     const response = await this.paymentRequest.post<GetTokenData>('Token/GetTokenData', {
       ...this.defaultBody,
       Token: token
+    })
+
+    return response.data
+  }
+
+  public async sendTransaction(dto: SendTransactionDto) {
+    const response = await this.paymentRequest.post<SendTransactionResponse>('Transaction/CommitFullTransaction', {
+      ...this.defaultBody,
+      CardNumber: dto.token,
+      CVV: dto.cardCVV,
+      TransactionSum: dto.transactionSum
     })
 
     return response.data
