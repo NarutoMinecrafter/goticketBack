@@ -3,6 +3,25 @@ import { Event, Location } from '../event/event.entity'
 import { SexEnum } from './user.dto'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { CardNumberType, TokenType } from '../types/payment.types'
+
+class Payment {
+  @ApiProperty({ description: 'User paymentToken', example: '' })
+  @Column({ nullable: true })
+  paymentToken?: TokenType
+
+  @ApiProperty({ description: 'User payment CVV code', example: '123' })
+  @Column({ nullable: true })
+  paymentCVV?: string
+
+  @ApiProperty({ description: 'User payment CVV code', example: 'Kiril Baranov' })
+  @Column({ nullable: true })
+  paymentCardHolder: string
+
+  @ApiProperty({ description: 'User formatted card', example: '44** **** **** 9000' })
+  @Column({ nullable: true })
+  formattedCardNumber: CardNumberType
+}
 
 @Entity()
 export class User {
@@ -49,6 +68,10 @@ export class User {
   @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
   @Column({ enum: SexEnum })
   sex?: SexEnum
+
+  @ApiProperty({ description: 'User paymentToken', example: '' })
+  @Column({ type: 'json', default: [] })
+  payments?: Payment[]
 
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
   @Column({ nullable: true })
