@@ -270,4 +270,13 @@ export class EventService {
 
     return Boolean(result.affected)
   }
+
+  getEventsByGuest(user: User) {
+    return this.eventRepository
+      .createQueryBuilder('event')
+      .innerJoin('event.guests', 'guest')
+      .innerJoin('guest.user', 'user')
+      .where('user.id = :id', { id: user.id })
+      .getMany()
+  }
 }
