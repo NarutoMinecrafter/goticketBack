@@ -54,6 +54,10 @@ export class UserService {
     })
   }
 
+  update(user: Partial<User> & Record<'id', User['id']>) {
+    return this.userRepository.update(user.id, user)
+  }
+
   async changeUser({ location, ...dto }: ChangeUserDto, user: User) {
     if (location) {
       const address = await getFormattedAddress(location)

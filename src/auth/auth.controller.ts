@@ -9,17 +9,17 @@ import { CreateUserDto } from './../user/user.dto'
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/login')
+  @Post('login')
   login(@Body() dto: CodeDto) {
     return this.authService.login(dto)
   }
 
-  @Post('/register')
+  @Post('register')
   register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto)
   }
 
-  @Post('/send-code')
+  @Post('send-code')
   sendCode(@Body() dto: PhoneDto) {
     return this.authService.sendCode(dto)
   }
