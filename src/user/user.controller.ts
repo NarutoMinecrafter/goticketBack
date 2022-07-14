@@ -36,6 +36,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: Boolean, description: 'Add payment card' })
   @Post('/add-card')
   addCard(@Body() dto: AddCardDto, @Req() { user }: Record<'user', User>) {
     return this.userService.addCard(dto, user)
