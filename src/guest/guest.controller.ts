@@ -28,7 +28,7 @@ export class GuestController {
 
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ type: Boolean, description: 'Accept guest' })
-  @Put('/status')
+  @Put('status')
   getBy(@Body() dto: ChangeGuestStatusDto, @Req() { user }: Record<'user', User>) {
     return this.guestService.changeGuestStatus(dto, user)
   }

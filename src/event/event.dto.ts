@@ -55,6 +55,12 @@ export class CreateEventDto {
   @IsNotEmpty()
   readonly endDate!: string
 
+  @ApiProperty({ example: [], description: 'Demo videos or pictures', required: false })
+  @IsArray()
+  @IsOptional()
+  @ArrayMaxSize(3)
+  readonly files: Express.Multer.File[]
+
   @ApiProperty({ example: ['https://youtu.be/dQw4w9WgXcQ'], description: 'Demo videos or pictures', required: false })
   @IsArray()
   @ArrayMaxSize(3)
@@ -224,8 +230,8 @@ export class ChangeEventDto extends PartialType(CreateEventDto) {
 }
 
 export class GetPopularLocation {
-  @ApiProperty({ example: 10, description: "Limit. Default: 5" })
+  @ApiProperty({ example: 10, description: 'Limit. Default: 5' })
   @IsNumber()
   @IsOptional()
-  readonly limit: number;
+  readonly limit: number
 }
