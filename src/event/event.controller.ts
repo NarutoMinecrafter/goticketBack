@@ -110,6 +110,13 @@ export class EventController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: Event, isArray: true, description: 'Get events where current user a guest' })
+  @Get('guests/me')
+  getEventsByGuestsAsMe(@Req() { user }: Record<'user', User>) {
+    return this.eventService.getEventsByGuest(user)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: Guest, isArray: true, description: 'Guests after buy tickets' })
   @Post('buy-tickets')
   buyTickets(@Body() dto: BuyTicketsDto, @Req() { user }: Record<'user', User>) {

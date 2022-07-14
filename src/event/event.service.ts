@@ -74,7 +74,11 @@ export class EventService {
     onlyInStock
   }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: ['creator', 'tickets']
+      relations: ['creator', 'tickets'],
+      where: {
+        isPrivate: false,
+        isHidden: false
+      }
     })
 
     if (date && !dateType) {
@@ -269,5 +273,14 @@ export class EventService {
     const result = await this.eventRepository.update(id, { ...dto, editors: users })
 
     return Boolean(result.affected)
+  }
+
+  getEventsByGuest(user: User) {
+    return this.eventRepository
+      .createQueryBuilder('event')
+      .innerJoin('event.guests', 'guest')
+      .innerJoin('guest.user', 'user')
+      .where('user.id = :id', { id: user.id })
+      .getMany()
   }
 }

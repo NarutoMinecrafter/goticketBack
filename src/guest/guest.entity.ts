@@ -10,6 +10,14 @@ export enum GuestStatus {
   Denied = 'denied'
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  BOOKED = 'booked',
+  CANCELLED = 'cancelled',
+  DECLINED = 'declined',
+  PURCHASED = 'purchased'
+}
+
 @Entity()
 export class Guest {
   @ApiProperty({ description: 'Guest id', example: 256 })
@@ -19,6 +27,10 @@ export class Guest {
   @ApiProperty({ description: 'Was he accepted to the event', example: true })
   @Column('enum', { enum: GuestStatus, default: GuestStatus.Request })
   status: GuestStatus
+
+  @ApiProperty({ description: 'Ticket status', example: PaymentStatus.PENDING })
+  @Column('enum', { enum: PaymentStatus, nullable: false, default: PaymentStatus.PENDING })
+  paymentStatus: PaymentStatus
 
   @ApiProperty({ description: 'User of this Guest', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.guests)

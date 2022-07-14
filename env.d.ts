@@ -7,10 +7,12 @@ export interface Env {
   TWILLO_ACCOUNT_SID: string
   TWILLO_AUTH_TOKEN: string
   TWILLO_PHONE: string
+  APIART_ZCREDIT_TERMINAL_NUMBER: string
+  APIART_ZCREDIT_PASSWORD: string
 }
 
 export declare global {
   namespace NodeJS {
-    interface ProcessEnv extends Env {}
+    type ProcessEnv = Env
   }
 }

@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
-import { Ticket, TicketStatus } from './ticket.entity'
+import { Ticket } from './ticket.entity'
 import { UserService } from '../user/user.service'
+import { PaymentStatus } from '../guest/guest.entity'
 
 @Injectable()
 export class TicketService {
@@ -84,11 +85,11 @@ export class TicketService {
     }
 
     ticket.currentCount -= count
-    ticket.status = isBooking ? TicketStatus.BOOKED : TicketStatus.PURCHASED
+    const paymentStatus = isBooking ? PaymentStatus.BOOKED : PaymentStatus.PENDING
 
     await this.update(ticket)
 
-    return await this.guestService.create({ user, event, ticket })
+    return await this.guestService.create({ user, event, ticket, paymentStatus })
   }
 
   getByAuthor(id: number) {

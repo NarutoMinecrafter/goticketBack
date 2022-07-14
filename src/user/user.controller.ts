@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Post,
   Put,
   Query,
   Req,
@@ -11,13 +12,13 @@ import {
   UseInterceptors
 } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { access, mkdir } from 'fs/promises'
 import { UserService } from './user.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { User } from './user.entity'
-import { ChangeUserDto, GetUserDto } from './user.dto'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { AddCardDto, ChangeUserDto, GetUserDto } from './user.dto'
 
 @ApiTags('User')
 @Controller('user')
@@ -47,6 +48,13 @@ export class UserController {
   @Put('profile')
   change(@Body() dto: ChangeUserDto, @Req() { user }: Record<'user', User>) {
     return this.userService.changeUser(dto, user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: Boolean, description: 'Add payment card' })
+  @Post('/add-card')
+  addCard(@Body() dto: AddCardDto, @Req() { user }: Record<'user', User>) {
+    return this.userService.addCard(dto, user)
   }
 
   // TODO: Update
