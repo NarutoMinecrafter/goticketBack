@@ -74,7 +74,11 @@ export class EventService {
     onlyInStock
   }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: ['creator', 'tickets']
+      relations: ['creator', 'tickets'],
+      where: {
+        isPrivate: false,
+        isHidden: false
+      }
     })
 
     if (date && !dateType) {
