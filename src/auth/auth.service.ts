@@ -12,7 +12,8 @@ import { getFormattedAddress } from '../utils/geolocation.utils'
 
 dotenv.config()
 
-const { REDIS_URL, TOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN } = process.env
+// @ts-expect-error
+const { REDIS_URL, TOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
 
 interface IPhone {
   code: number
@@ -23,6 +24,7 @@ interface IPhone {
 export class AuthService {
   private readonly totp = new TOTP({ step: 3600, createDigest, digits: 4 })
   private readonly redis: RedisClientType
+  // @ts-expect-error
   private readonly twillo: Twilio
 
   constructor(private readonly jwtService: JwtService, private readonly userService: UserService) {
