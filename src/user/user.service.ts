@@ -38,8 +38,6 @@ export class UserService {
       }
 
       if (includePayments) {
-        console.log('payments')
-        console.log(user)
         return user
       }
 
@@ -121,7 +119,6 @@ export class UserService {
   async addCard(dto: AddCardDto, user: User) {
     const response = await this.paymentUtils.createToken({ cardExpiry: dto.cardExpiry, cardNumber: dto.cardNumber })
 
-    console.log(response)
     if (response.HasError) {
       throw new BadRequestException(`Error code ${response.ReturnCode}: ${response.ReturnMessage}`)
     }

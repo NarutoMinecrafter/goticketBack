@@ -37,7 +37,8 @@ export class GuestService {
       .createQueryBuilder('guest')
       .leftJoinAndSelect('guest.event', 'event')
       .leftJoinAndSelect('guest.ticket', 'ticket')
-      .leftJoinAndSelect('event.creator', 'user')
+      .leftJoinAndSelect('guest.user', 'user')
+      .leftJoinAndSelect('event.creator', 'creator')
       .leftJoinAndSelect('event.editors', 'editor')
       .andWhere('guest.id = :id', { id: dto.id })
       .getOne()
@@ -51,23 +52,33 @@ export class GuestService {
     }
 
     if (dto.status === GuestStatus.Accepted && guest.paymentStatus !== PaymentStatus.BOOKED) {
-      if (!user.payments?.length) {
-        throw new BadRequestException('User has no payments')
-      }
-
-      const result = await this.paymentUtils.sendTransaction({
-        transactionSum: guest.ticket.price,
-        cardCVV: user.payments[0].paymentCVV!,
-        token: user.payments[0].paymentToken!
-      })
-
-      if (result.HasError) {
-        throw new BadRequestException(`Payment error ${result.ReturnCode}: ${result.ReturnMessage}`)
-      }
+      await this.buyTicket(guest)
     }
 
     const result = await this.guestRepository.update(dto.id, { status: dto.status })
 
     return Boolean(result.affected)
+  }
+
+  public async buyTicket(guest: Guest) {
+    const user = guest.user
+
+    if (!user.payments?.length) {
+      throw new BadRequestException('User has no payments')
+    }
+
+    const result = await this.paymentUtils.sendTransaction({
+      transactionSum: guest.ticket.price,
+      cardCVV: user.payments[0].paymentCVV!,
+      token: user.payments[0].paymentToken!
+    })
+
+    if (result.HasError) {
+      throw new BadRequestException(`Payment error ${result.ReturnCode}: ${result.ReturnMessage}`)
+    }
+  }
+
+  async useTicket(guestId: number) {
+    return this.guestRepository.update(guestId, { isTicketUsed: true })
   }
 }

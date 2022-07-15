@@ -3,19 +3,22 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
-import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes } from './event.dto'
+import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
 import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
 import { getDistance } from 'geolib'
 import { getFormattedAddress } from '../utils/geolocation.utils'
 import { sortMap } from '../utils/map.utils'
+import { GuestService } from '../guest/guest.service'
+import { PaymentStatus } from '../guest/guest.entity'
 
 @Injectable()
 export class EventService {
   constructor(
     @InjectRepository(Event) private readonly eventRepository: Repository<Event>,
     private readonly ticketService: TicketService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly guestService: GuestService
   ) {}
 
   async create({ tickets: ticketsDto, requiredAdditionalInfo, editors, ...dto }: CreateEventDto, user: User) {
@@ -203,7 +206,6 @@ export class EventService {
   }
 
   async getByAuthor(authorId: number) {
-    // return this.eventRepository.createQueryBuilder('event').where('event.creator.id = :id', { id: authorId }).getMany()
     return this.eventRepository.find({
       where: { creator: { id: authorId } },
       relations: ['creator', 'tickets', 'editors', 'guests']
@@ -282,5 +284,39 @@ export class EventService {
       .innerJoin('guest.user', 'user')
       .where('user.id = :id', { id: user.id })
       .getMany()
+  }
+
+  async useTicket({ guestId, payByCard }: UseTicketDto, user: User) {
+    const event = await this.eventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.guests', 'guest')
+      .leftJoinAndSelect('event.creator', 'creator')
+      .leftJoinAndSelect('event.editors', 'editors')
+      .leftJoinAndSelect('guest.ticket', 'ticket')
+      .leftJoinAndSelect('guest.user', 'user')
+      .where('guest.id = :id', { id: guestId })
+      .getOne()
+
+    if (!event) {
+      throw new BadRequestException(`Guest with id ${guestId} is not defined!`)
+    }
+
+    const guest = event.guests.find(guest => guest.id === guestId)!
+
+    if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
+      throw new BadRequestException('You do not have permission to use this ticket')
+    }
+
+    if (guest.isTicketUsed) {
+      throw new BadRequestException('Ticket is already used')
+    }
+
+    if (guest.paymentStatus === PaymentStatus.BOOKED && payByCard) {
+      await this.guestService.buyTicket(guest)
+    }
+
+    const result = await this.guestService.useTicket(guest.id)
+
+    return Boolean(result.affected)
   }
 }

@@ -235,3 +235,18 @@ export class GetPopularLocation {
   @IsOptional()
   readonly limit: number
 }
+
+export class UseTicketDto {
+  @ApiProperty({ example: 1, description: 'Guest id' })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly guestId: number
+
+  @ApiProperty({
+    example: 1,
+    description: 'If true and the ticket is booked, then the money will be deducted from the card'
+  })
+  @IsBoolean()
+  @IsOptional()
+  readonly payByCard?: boolean
+}
