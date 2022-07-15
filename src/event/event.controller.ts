@@ -22,7 +22,8 @@ import {
   CreateEventDto,
   GetByEventIdDto,
   GetEventDto,
-  GetPopularLocation
+  GetPopularLocation,
+  UseTicketDto
 } from './event.dto'
 import { EventService } from './event.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
@@ -88,6 +89,13 @@ export class EventController {
   @Get('popular-locations')
   getPopularLocations(@Query() { limit }: GetPopularLocation) {
     return this.eventService.getPopularLocation(limit || 5)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  // @ApiResponse()
+  @Post('use-ticket')
+  useTicket(@Body() dto: UseTicketDto, @Req() { user }: Record<'user', User>) {
+    return this.eventService.useTicket(dto, user)
   }
 
   @UseGuards(JwtAuthGuard)

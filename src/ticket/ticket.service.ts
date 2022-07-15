@@ -46,6 +46,10 @@ export class TicketService {
       throw new BadRequestException(`Ticket with id ${id} is not defined!`)
     }
 
+    if (ticket.currentCount === 0) {
+      throw new BadRequestException(`Ticket "${ticket.name}" is sold out!`)
+    }
+
     const { isAgeRequired, minRequiredAge, isSexRequired, isIDCodeRequired, isInstagramRequired } =
       event.requiredAdditionalInfo
     const { name, phone, sex, IDcode, instagram } = user

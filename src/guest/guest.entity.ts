@@ -32,6 +32,10 @@ export class Guest {
   @Column('enum', { enum: PaymentStatus, nullable: false, default: PaymentStatus.PENDING })
   paymentStatus: PaymentStatus
 
+  @ApiProperty({ description: 'Is ticket used', example: true })
+  @Column('bool', { default: false })
+  isTicketUsed: boolean
+
   @ApiProperty({ description: 'User of this Guest', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.guests)
   user: User
