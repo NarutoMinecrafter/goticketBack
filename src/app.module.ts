@@ -12,6 +12,7 @@ import { EventModule } from './event/event.module'
 import { Event } from './event/event.entity'
 import { GuestModule } from './guest/guest.module'
 import { Guest } from './guest/guest.entity'
+import { NotificationModule } from './notification/notification.module'
 
 dotenv.config()
 
@@ -30,7 +31,8 @@ const { PG_URL } = process.env
     AuthModule,
     TicketModule,
     EventModule,
-    GuestModule
+    GuestModule,
+    NotificationModule
   ]
 })
 export class AppModule {}

@@ -77,6 +77,10 @@ export class User {
   @Column({ nullable: true })
   avatar?: string
 
+  @ApiProperty({ description: 'Push notification token', example: 'YOUR NOTIFICATION TOKEN' })
+  @Column({ nullable: true })
+  pushNotificationToken?: string
+
   @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)
   events?: Event[]

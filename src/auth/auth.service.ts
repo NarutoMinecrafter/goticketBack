@@ -5,7 +5,7 @@ import { createDigest } from '@otplib/plugin-crypto'
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { createClient, RedisClientType } from 'redis'
-import { CodeDto, PhoneDto } from './auth.dto'
+import { CodeDto, LoginDto, PhoneDto } from './auth.dto'
 import { CreateUserDto } from '../user/user.dto'
 import { Twilio } from 'twilio'
 import { getFormattedAddress } from '../utils/geolocation.utils'
@@ -33,7 +33,7 @@ export class AuthService {
     this.twillo = new Twilio(TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN)
   }
 
-  async login(dto: CodeDto) {
+  async login(dto: LoginDto) {
     const isConfirmed = await this.checkCode(dto)
 
     if (isConfirmed) {
@@ -41,6 +41,8 @@ export class AuthService {
 
       if (user) {
         const token = await this.jwtService.signAsync({ id: user.id })
+
+        this.userService.update({ id: user.id, pushNotificationToken: dto.pushNotificationToken })
 
         return { token }
       }
