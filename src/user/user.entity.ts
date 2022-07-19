@@ -65,6 +65,10 @@ export class User {
   @Column({ unique: true, nullable: true })
   instagram?: string
 
+  @ApiProperty({ description: 'About user', example: 'I YouTube' })
+  @Column({ nullable: true })
+  aboutMe?: string
+
   @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
   @Column({ enum: SexEnum })
   sex?: SexEnum
