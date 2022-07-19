@@ -1,16 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { getDistance } from 'geolib'
+import { scheduleJob } from 'node-schedule'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
 import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
-import { getDistance } from 'geolib'
 import { getFormattedAddress } from '../utils/geolocation.utils'
 import { sortMap } from '../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
+import { NotificationService } from '../notification/notification.service'
 
 @Injectable()
 export class EventService {
@@ -18,7 +20,8 @@ export class EventService {
     @InjectRepository(Event) private readonly eventRepository: Repository<Event>,
     private readonly ticketService: TicketService,
     private readonly userService: UserService,
-    private readonly guestService: GuestService
+    private readonly guestService: GuestService,
+    private readonly notificationService: NotificationService
   ) {}
 
   async create({ tickets: ticketsDto, requiredAdditionalInfo, editors, ...dto }: CreateEventDto, user: User) {
@@ -53,6 +56,28 @@ export class EventService {
     }
 
     event = await this.eventRepository.save(event)
+
+    const date = new Date(event.startDate)
+    date.setDate(date.getDate() - 1)
+
+    scheduleJob(event.id.toString(), date, async () => {
+      const guests = (await this.getGuestsById(event.id)) || []
+
+      const messages =
+        guests
+          .filter(guest => !!guest.user.pushNotificationToken)
+          .map(guest => ({
+            token: guest.user.pushNotificationToken as string,
+            notification: {
+              title: "Notification of tomorrow's event",
+              body: `Starting ${event.name} tomorrow at ${date.getHours()}:${date.getMinutes()}. Don't be late!`
+            },
+            data: { eventId: event.id.toString() }
+          })) || []
+
+      this.notificationService.sendPushNotifications(messages)
+    })
+
     return event
   }
 

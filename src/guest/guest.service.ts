@@ -5,12 +5,16 @@ import { Repository } from 'typeorm'
 import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
 import { PaymentUtils } from '../utils/payment.utils'
+import { NotificationService } from './../notification/notification.service'
 
 @Injectable()
 export class GuestService {
   private readonly paymentUtils: PaymentUtils
 
-  constructor(@InjectRepository(Guest) private readonly guestRepository: Repository<Guest>) {
+  constructor(
+    @InjectRepository(Guest) private readonly guestRepository: Repository<Guest>,
+    private readonly notificationService: NotificationService
+  ) {
     this.paymentUtils = new PaymentUtils()
   }
 
@@ -53,6 +57,17 @@ export class GuestService {
 
     if (dto.status === GuestStatus.Accepted && guest.paymentStatus !== PaymentStatus.BOOKED) {
       await this.buyTicket(guest)
+    }
+
+    if (guest.user.pushNotificationToken) {
+      this.notificationService.sendPushNotification({
+        token: guest.user.pushNotificationToken,
+        notification: {
+          title: 'Change payment status',
+          body: `Ticket status for ${guest.event.name} has been changed too ${dto.status}`
+        },
+        data: { screen: 'Tickets' }
+      })
     }
 
     const result = await this.guestRepository.update(dto.id, { status: dto.status })
