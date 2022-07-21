@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 import { getDistance } from 'geolib'
 import { scheduleJob } from 'node-schedule'
 import { TicketService } from '../ticket/ticket.service'
@@ -92,6 +92,7 @@ export class EventService {
   }
 
   async getAll({
+    query,
     sortBy,
     userLocation,
     isUntilDate,
@@ -101,11 +102,14 @@ export class EventService {
     placeNearInMeters,
     onlyInStock
   }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
+    const pattern = query && `%${query.split(' ').join('%')}%`
+
     const events = await this.eventRepository.find({
       relations: ['creator', 'tickets'],
       where: {
         isPrivate: false,
-        isHidden: false
+        isHidden: false,
+        name: ILike(pattern || '%')
       }
     })
 
