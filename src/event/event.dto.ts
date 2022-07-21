@@ -134,6 +134,11 @@ export class GetEventDto {
   @IsNumberString()
   readonly id?: string
 
+  @ApiProperty({ example: 'Minecone', description: 'Search by query', required: false })
+  @IsOptional()
+  @IsString()
+  readonly query?: string
+
   @ApiProperty({ example: SortTypes.ByDate, description: 'Sort events by value', required: false, enum: SortTypes })
   @IsOptional()
   @IsEnum(SortTypes)
