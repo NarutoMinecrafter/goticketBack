@@ -45,7 +45,8 @@ export class UserService {
 
       newUser.payments = user.payments!.map(payment => ({
         formattedCardNumber: payment.formattedCardNumber,
-        paymentCardHolder: payment.paymentCardHolder
+        paymentCardHolder: payment.paymentCardHolder,
+        isSelected: payment.isSelected
       }))
 
       return newUser
@@ -126,6 +127,8 @@ export class UserService {
     if (await this.isCardExists(dto.cardNumber, user)) {
       throw new BadRequestException('Card already exists')
     }
+
+    user.payments = user.payments!.map(payment => ({ ...payment, selected: false }))
 
     user.payments!.push({
       paymentToken: response.Token,

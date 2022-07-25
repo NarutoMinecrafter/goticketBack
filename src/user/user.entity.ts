@@ -21,6 +21,9 @@ class Payment {
   @ApiProperty({ description: 'User formatted card', example: '44** **** **** 9000' })
   @Column({ nullable: true })
   formattedCardNumber: CardNumberType
+
+  @Column({ nullable: false, default: true })
+  isSelected?: boolean
 }
 
 @Entity()
