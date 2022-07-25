@@ -1,9 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import { Event, Location } from '../event/event.entity'
+import { BadRequestException } from '@nestjs/common'
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { SexEnum } from './user.dto'
-import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { CardNumberType, TokenType } from '../types/payment.types'
+import { getFormattedAddress } from '../../utils/geolocation.utils'
+import { Guest } from '../guest/guest.entity'
+import { Event } from '../event/event.entity'
+import { CardNumberType, TokenType } from '../../types/payment.types'
+import { Location } from '../../types/location.types'
 
 class Payment {
   @ApiProperty({ description: 'User paymentToken', example: '' })
@@ -95,4 +98,18 @@ export class User {
   @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest], default: [] })
   @OneToMany(() => Guest, guest => guest.event)
   guests?: Guest[]
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async formateAddress() {
+    if (this.location) {
+      const address = await getFormattedAddress(this.location)
+
+      if (!address) {
+        throw new BadRequestException('Invalid location')
+      }
+
+      this.address = address
+    }
+  }
 }

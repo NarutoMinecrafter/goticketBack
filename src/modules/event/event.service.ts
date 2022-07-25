@@ -8,8 +8,7 @@ import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
 import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
-import { getFormattedAddress } from '../utils/geolocation.utils'
-import { sortMap } from '../utils/map.utils'
+import { sortMap } from '../../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
 import { NotificationService } from '../notification/notification.service'
@@ -44,16 +43,6 @@ export class EventService {
       }) || []
     )
     event.guests = []
-
-    if (dto.location) {
-      const address = await getFormattedAddress(dto.location)
-
-      if (!address) {
-        throw new BadRequestException('Invalid location')
-      }
-
-      event.address = address
-    }
 
     event = await this.eventRepository.save(event)
 
@@ -273,7 +262,7 @@ export class EventService {
     return locations.slice(0, limit)
   }
 
-  async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {
+  async update({ id, editors, ...dto }: ChangeEventDto, user: User) {
     const event = await this.getBy('id', id)
 
     if (!event) {
@@ -295,13 +284,6 @@ export class EventService {
         return user
       }) || event.editors
     )
-
-    if (dto.location) {
-      const address = await getFormattedAddress(dto.location)
-      const result = await this.eventRepository.update(id, { ...dto, address })
-
-      return Boolean(result.affected)
-    }
 
     const result = await this.eventRepository.update(id, { ...dto, editors: users })
 

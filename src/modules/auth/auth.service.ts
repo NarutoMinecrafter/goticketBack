@@ -2,13 +2,12 @@ import dotenv from 'dotenv'
 import { UserService } from '../user/user.service'
 import { TOTP } from '@otplib/core'
 import { createDigest } from '@otplib/plugin-crypto'
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { createClient, RedisClientType } from 'redis'
 import { CodeDto, LoginDto, PhoneDto } from './auth.dto'
 import { CreateUserDto } from '../user/user.dto'
 import { Twilio } from 'twilio'
-import { getFormattedAddress } from '../utils/geolocation.utils'
 
 dotenv.config()
 
@@ -53,15 +52,19 @@ export class AuthService {
     throw new UnauthorizedException()
   }
 
-  async register({ location, ...dto }: CreateUserDto) {
+  async register(dto: CreateUserDto) {
+    const existedUser = await this.userService.getBy('phone', dto.phone)
+
+    if (existedUser) {
+      throw new BadRequestException('User already exists')
+    }
+
     const candidatePromise = await this.redis.get(dto.phone)
     const candidate: IPhone | null = candidatePromise && JSON.parse(candidatePromise)
     const isConfirmed = candidate?.confirmed
 
     if (isConfirmed) {
-      const address = location ? await getFormattedAddress(location) : ''
-
-      const user = await this.userService.create({ location: location || null, address, ...dto })
+      const user = await this.userService.create(dto)
       const token = await this.jwtService.signAsync({ id: user.id })
 
       return { token }

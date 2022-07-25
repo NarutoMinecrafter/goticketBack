@@ -3,7 +3,7 @@ import { ApiOkResponse, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger'
 import { ChangeGuestStatusDto, GetGuestDto } from './guest.dto'
 import { Guest } from './guest.entity'
 import { GuestService } from './guest.service'
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/auth.guard'
 import { User } from '../user/user.entity'
 
 @ApiTags('Guest')
