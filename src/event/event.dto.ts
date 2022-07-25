@@ -155,21 +155,21 @@ export class GetEventDto {
 
   @ApiProperty({
     example: '2022-02-24T02:00:00.777Z',
-    description: `Filter by date`,
+    description: `Filter by date from this`,
     required: false
   })
   @IsDateString()
   @IsOptional()
-  readonly date?: string
+  readonly dateFrom?: string
 
   @ApiProperty({
-    example: 'false',
-    description: `Specify whether to sort exactly by the specified date or until the specified date`,
+    example: '2022-02-24T02:00:00.777Z',
+    description: `Filter by date to this`,
     required: false
   })
-  @IsBooleanString()
+  @IsDateString()
   @IsOptional()
-  readonly isUntilDate?: string
+  readonly dateTo?: string
 
   @ApiProperty({
     example: 'start,creation',
