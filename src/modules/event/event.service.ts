@@ -8,8 +8,7 @@ import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
 import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
-import { getFormattedAddress } from '../utils/geolocation.utils'
-import { sortMap } from '../utils/map.utils'
+import { sortMap } from '../../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
 import { NotificationService } from '../notification/notification.service'
@@ -44,16 +43,6 @@ export class EventService {
       }) || []
     )
     event.guests = []
-
-    if (dto.location) {
-      const address = await getFormattedAddress(dto.location)
-
-      if (!address) {
-        throw new BadRequestException('Invalid location')
-      }
-
-      event.address = address
-    }
 
     event = await this.eventRepository.save(event)
 
@@ -95,8 +84,8 @@ export class EventService {
     query,
     sortBy,
     userLocation,
-    isUntilDate,
-    date,
+    dateFrom,
+    dateTo,
     dateType,
     eventType,
     placeNearInMeters,
@@ -113,7 +102,7 @@ export class EventService {
       }
     })
 
-    if (date && !dateType) {
+    if ((dateFrom || dateTo) && !dateType) {
       throw new BadRequestException('Date type is required for date filter')
     }
 
@@ -123,42 +112,44 @@ export class EventService {
 
     const filteredEvents = events.filter(event => {
       const filtered = {
-        date: true,
+        dateFrom: true,
+        dateTo: true,
         location: true,
         type: true,
         inStock: true
       }
 
-      if (date && dateType) {
+      if (dateType && dateFrom) {
         const dateTypes = dateType!.split(',')
-        const specifiedDate = new Date(date)
+        const specifiedDateFrom = new Date(dateFrom)
 
         if (!dateTypes.includes('start') && !dateTypes.includes('creation')) {
           throw new BadRequestException('Date type is not valid. Possible values: start, creation')
         }
 
-        const untilDate = isUntilDate !== 'false'
-
         if (dateTypes.includes('start')) {
-          if (untilDate) {
-            filtered.date = event.startDate.getTime() <= specifiedDate.getTime()
-          } else {
-            filtered.date =
-              event.startDate.getFullYear() === specifiedDate.getFullYear() &&
-              event.startDate.getMonth() === specifiedDate.getMonth() &&
-              event.startDate.getDate() === specifiedDate.getDate()
-          }
+          filtered.dateFrom = event.startDate.getTime() >= specifiedDateFrom.getTime()
         }
 
         if (dateTypes.includes('creation')) {
-          if (untilDate) {
-            filtered.date = event.createDate.getTime() <= specifiedDate.getTime()
-          } else {
-            filtered.date =
-              event.createDate.getFullYear() === specifiedDate.getFullYear() &&
-              event.createDate.getMonth() === specifiedDate.getMonth() &&
-              event.createDate.getDate() === specifiedDate.getDate()
-          }
+          filtered.dateFrom = event.createDate.getTime() >= specifiedDateFrom.getTime()
+        }
+      }
+
+      if (dateType && dateTo) {
+        const dateTypes = dateType!.split(',')
+        const specifiedDateFrom = new Date(dateTo)
+
+        if (!dateTypes.includes('start') && !dateTypes.includes('creation')) {
+          throw new BadRequestException('Date type is not valid. Possible values: start, creation')
+        }
+
+        if (dateTypes.includes('start')) {
+          filtered.dateTo = event.startDate.getTime() <= specifiedDateFrom.getTime()
+        }
+
+        if (dateTypes.includes('creation')) {
+          filtered.dateTo = event.createDate.getTime() <= specifiedDateFrom.getTime()
         }
       }
 
@@ -271,7 +262,7 @@ export class EventService {
     return locations.slice(0, limit)
   }
 
-  async changeEvent({ id, editors, ...dto }: ChangeEventDto, user: User) {
+  async update({ id, editors, ...dto }: ChangeEventDto, user: User) {
     const event = await this.getBy('id', id)
 
     if (!event) {
@@ -293,13 +284,6 @@ export class EventService {
         return user
       }) || event.editors
     )
-
-    if (dto.location) {
-      const address = await getFormattedAddress(dto.location)
-      const result = await this.eventRepository.update(id, { ...dto, address })
-
-      return Boolean(result.affected)
-    }
 
     const result = await this.eventRepository.update(id, { ...dto, editors: users })
 

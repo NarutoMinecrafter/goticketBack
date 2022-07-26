@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -13,7 +15,9 @@ import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsBoolean, IsLatitude, IsLongitude, IsNumber, Min } from 'class-validator'
+import { IsBoolean, IsNumber, Min } from 'class-validator'
+import { getFormattedAddress } from '../../utils/geolocation.utils'
+import { BadRequestException } from '@nestjs/common'
 
 export enum TypeEnum {
   Music = 'Music',
@@ -62,16 +66,6 @@ export class RequiredAdditionalInfoDto {
 }
 
 export const defaultRequiredAdditionalInfo = new RequiredAdditionalInfoDto()
-
-export class Location {
-  @ApiProperty({ description: 'Latitude', example: 35.7040744 })
-  @IsLatitude()
-  lat: number
-
-  @ApiProperty({ description: 'Longitude', example: 139.5577317 })
-  @IsLongitude()
-  lon: number
-}
 
 @Entity()
 export class Event {
@@ -167,4 +161,18 @@ export class Event {
   @OneToMany(() => Guest, guest => guest.event)
   @JoinColumn()
   guests: Guest[]
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async formateAddress() {
+    if (this.location) {
+      const address = await getFormattedAddress(this.location)
+
+      if (!address) {
+        throw new BadRequestException('Invalid location')
+      }
+
+      this.address = address
+    }
+  }
 }

@@ -1,11 +1,11 @@
-import { AddCardDto, ChangeUserDto } from './user.dto'
+import { AddCardDto, ChangeUserDto, CreateUserDto } from './user.dto'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
-import { getFormattedAddress } from '../utils/geolocation.utils'
-import { PaymentUtils } from '../utils/payment.utils'
-import { CardNumberType } from '../types/payment.types'
+import { getFormattedAddress } from '../../utils/geolocation.utils'
+import { PaymentUtils } from '../../utils/payment.utils'
+import { CardNumberType } from '../../types/payment.types'
 
 @Injectable()
 export class UserService {
@@ -15,13 +15,7 @@ export class UserService {
     this.paymentUtils = new PaymentUtils()
   }
 
-  async create(dto: Omit<User, 'id'>) {
-    const existedUser = await this.userRepository.findOneBy({ phone: dto.phone })
-
-    if (existedUser) {
-      throw new BadRequestException('User already exists')
-    }
-
+  async create(dto: CreateUserDto) {
     return this.userRepository.save(this.userRepository.create(dto))
   }
 
@@ -45,7 +39,8 @@ export class UserService {
 
       newUser.payments = user.payments!.map(payment => ({
         formattedCardNumber: payment.formattedCardNumber,
-        paymentCardHolder: payment.paymentCardHolder
+        paymentCardHolder: payment.paymentCardHolder,
+        isSelected: payment.isSelected
       }))
 
       return newUser
@@ -54,23 +49,6 @@ export class UserService {
 
   update(user: Partial<User> & Record<'id', User['id']>) {
     return this.userRepository.update(user.id, user)
-  }
-
-  async changeUser({ location, ...dto }: ChangeUserDto, user: User) {
-    if (location) {
-      const address = await getFormattedAddress(location)
-      const result = await this.userRepository.update(user.id, {
-        location,
-        address,
-        ...dto
-      })
-
-      return Boolean(result.affected)
-    }
-
-    const result = await this.userRepository.update(user.id, dto)
-
-    return Boolean(result.affected)
   }
 
   async getById(id: number) {
@@ -126,6 +104,8 @@ export class UserService {
     if (await this.isCardExists(dto.cardNumber, user)) {
       throw new BadRequestException('Card already exists')
     }
+
+    user.payments = user.payments!.map(payment => ({ ...payment, selected: false }))
 
     user.payments!.push({
       paymentToken: response.Token,

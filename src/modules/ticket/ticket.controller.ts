@@ -5,7 +5,7 @@ import { Ticket } from './ticket.entity'
 import { TicketService } from './ticket.service'
 import { User } from '../user/user.entity'
 import { Guest } from '../guest/guest.entity'
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/auth.guard'
 
 @ApiTags('Ticket')
 @Controller('ticket')

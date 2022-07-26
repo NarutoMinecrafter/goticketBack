@@ -6,7 +6,7 @@ import { NotificationService } from './notification.service'
 @Module({
   imports: [
     FirebaseModule.forRoot({
-      googleApplicationCredential: join(__dirname, '..', '..', 'config', 'firebase.json')
+      googleApplicationCredential: join(__dirname, '..', '..', '..', 'config', 'firebase.json')
     })
   ],
   providers: [NotificationService],

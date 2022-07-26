@@ -14,8 +14,8 @@ import {
   Matches,
   MinLength
 } from 'class-validator'
-import { Location } from '../event/event.entity'
-import { CardNumberType } from '../types/payment.types'
+import { Location } from '../../types/location.types'
+import { CardNumberType } from '../../types/payment.types'
 
 export enum SexEnum {
   Man = 'man',
