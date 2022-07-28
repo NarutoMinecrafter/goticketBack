@@ -1,3 +1,4 @@
+import { Payment } from './../payment/payment.entity'
 import { Body, Controller, Get, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { UserService } from './user.service'
@@ -45,14 +46,14 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: User, description: 'Current user' })
+  @ApiOkResponse({ type: Payment, isArray: true, description: 'Current user payments' })
   @Get('payments')
   getPayments(@Req() { user }: Record<'user', User>) {
     return this.userService.getPayments(user.id)
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: User, description: 'Current user' })
+  @ApiOkResponse({ type: Payment, description: 'Current user selected payment' })
   @Get('payments/selected')
   getSelectedPayment(@Req() { user }: Record<'user', User>) {
     return this.userService.getSelectedPayment(user.id)
