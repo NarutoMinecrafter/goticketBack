@@ -30,6 +30,7 @@ export class UserService {
         events: true,
         guests: true,
         payments: {
+          id: true,
           formattedCardNumber: true,
           paymentCardHolder: true,
           isSelected: true

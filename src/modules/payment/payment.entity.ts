@@ -9,11 +9,9 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ApiProperty({ description: 'User paymentToken', example: '' })
   @Column({ nullable: true })
   paymentToken?: TokenType
 
-  @ApiProperty({ description: 'User payment CVV code', example: '123' })
   @Column({ nullable: true })
   paymentCVV?: string
 
@@ -29,7 +27,6 @@ export class Payment {
   @Column({ nullable: false, default: true })
   isSelected?: boolean
 
-  @ApiProperty({ description: 'User with this payment', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.payments)
   user: User
 }
