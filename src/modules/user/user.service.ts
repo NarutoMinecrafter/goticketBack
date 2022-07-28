@@ -26,16 +26,7 @@ export class UserService {
   getBy(key: keyof User, value: User[keyof User]) {
     return this.userRepository.findOne({
       where: { [key]: value },
-      relations: {
-        events: true,
-        guests: true,
-        payments: {
-          id: true,
-          formattedCardNumber: true,
-          paymentCardHolder: true,
-          isSelected: true
-        }
-      }
+      relations: ['events', 'guests', 'payments']
     })
   }
 
