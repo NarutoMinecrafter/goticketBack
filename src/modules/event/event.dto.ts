@@ -17,8 +17,9 @@ import {
   IsOptional,
   IsString
 } from 'class-validator'
+import { Location, StringLocation } from '../../types/location.types'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
-import { Location, RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
+import { RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -26,8 +27,6 @@ export enum SortTypes {
   ByGeolocation = 'geo',
   ByCreateDate = 'createDate'
 }
-
-export type StringLocation = `${Location['lat']}, ${Location['lon']}`
 
 export class CreateEventDto {
   @ApiProperty({ example: 'Comic con', description: 'Title' })
@@ -76,14 +75,6 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   readonly bank: string
-
-  @ApiProperty({
-    example: '302 8TH NEW YORK NY 10001-4813 USA',
-    description: 'Pretty variant of address'
-  })
-  @IsString()
-  @IsNotEmpty()
-  readonly address: string
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
   @IsBoolean()
@@ -155,21 +146,21 @@ export class GetEventDto {
 
   @ApiProperty({
     example: '2022-02-24T02:00:00.777Z',
-    description: `Filter by date`,
+    description: `Filter by date from this`,
     required: false
   })
   @IsDateString()
   @IsOptional()
-  readonly date?: string
+  readonly dateFrom?: string
 
   @ApiProperty({
-    example: 'false',
-    description: `Specify whether to sort exactly by the specified date or until the specified date`,
+    example: '2022-02-24T02:00:00.777Z',
+    description: `Filter by date to this`,
     required: false
   })
-  @IsBooleanString()
+  @IsDateString()
   @IsOptional()
-  readonly isUntilDate?: string
+  readonly dateTo?: string
 
   @ApiProperty({
     example: 'start,creation',

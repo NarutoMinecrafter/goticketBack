@@ -1,5 +1,5 @@
 import NodeGeocoder from 'node-geocoder'
-import { Location } from '../event/event.entity'
+import { Location } from '../types/location.types'
 
 const GeoCoder = NodeGeocoder({
   provider: 'openstreetmap',

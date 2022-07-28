@@ -1,21 +1,7 @@
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { FilesInterceptor } from '@nestjs/platform-express'
-import { diskStorage } from 'multer'
 import { rm } from 'fs/promises'
 import { join } from 'path'
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Post,
-  Put,
-  Query,
-  Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Put, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common'
 import {
   BuyTicketsDto,
   ChangeEventDto,
@@ -26,38 +12,22 @@ import {
   UseTicketDto
 } from './event.dto'
 import { EventService } from './event.service'
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/auth.guard'
 import { User } from '../user/user.entity'
 import { Event } from './event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
+import { filesInterceptor } from './event.interceptor'
 
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  // TODO: Update
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: Event, description: 'Created event' })
   @Post()
-  @UseInterceptors(
-    FilesInterceptor('files', 3, {
-      fileFilter(_req, file, callback) {
-        if (!(file.mimetype.includes('image') || file.mimetype.includes('video'))) {
-          return callback(new BadRequestException('Invalid file type'), false)
-        }
-
-        callback(null, true)
-      },
-      storage: diskStorage({
-        destination: './static/event',
-        filename(_req, file, callback) {
-          callback(null, `${Date.now()}.${file.originalname.split('.').slice(-1)}`)
-        }
-      })
-    })
-  )
+  @UseInterceptors(filesInterceptor)
   create(
     @Body() dto: CreateEventDto,
     @Req() { user }: Record<'user', User>,
@@ -131,27 +101,10 @@ export class EventController {
     return this.eventService.buyTickets(dto, user)
   }
 
-  // TODO: Update
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: Boolean, description: 'Change event values' })
   @Put()
-  @UseInterceptors(
-    FilesInterceptor('files', 3, {
-      fileFilter(_req, file, callback) {
-        if (!(file.mimetype.includes('image') || file.mimetype.includes('video'))) {
-          return callback(new BadRequestException('Invalid file type'), false)
-        }
-
-        callback(null, true)
-      },
-      storage: diskStorage({
-        destination: './static/event',
-        filename(_req, file, callback) {
-          callback(null, `${Date.now()}.${file.originalname.split('.').slice(-1)}`)
-        }
-      })
-    })
-  )
+  @UseInterceptors(filesInterceptor)
   async change(
     @Body() dto: ChangeEventDto,
     @Req() { user }: Record<'user', User>,
@@ -161,9 +114,9 @@ export class EventController {
 
     if (demoLinks?.length) {
       const event = await this.eventService.getBy('id', dto.id)
-      event?.demoLinks.forEach(async link => await rm(join(__dirname, '..', '..', link)))
+      event?.demoLinks.forEach(async link => await rm(join(__dirname, '..', '..', '..', link)))
     }
 
-    return this.eventService.changeEvent(demoLinks?.length ? { ...dto, demoLinks } : dto, user)
+    return this.eventService.update(demoLinks?.length ? { ...dto, demoLinks } : dto, user)
   }
 }

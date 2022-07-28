@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
-import { PaymentUtils } from '../utils/payment.utils'
+import { PaymentUtils } from '../../utils/payment.utils'
 import { NotificationService } from './../notification/notification.service'
 
 @Injectable()

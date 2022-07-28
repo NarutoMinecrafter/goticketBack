@@ -1,27 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import { Event, Location } from '../event/event.entity'
+import { BadRequestException } from '@nestjs/common'
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { SexEnum } from './user.dto'
-import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { CardNumberType, TokenType } from '../types/payment.types'
-
-class Payment {
-  @ApiProperty({ description: 'User paymentToken', example: '' })
-  @Column({ nullable: true })
-  paymentToken?: TokenType
-
-  @ApiProperty({ description: 'User payment CVV code', example: '123' })
-  @Column({ nullable: true })
-  paymentCVV?: string
-
-  @ApiProperty({ description: 'User payment CVV code', example: 'Kiril Baranov' })
-  @Column({ nullable: true })
-  paymentCardHolder: string
-
-  @ApiProperty({ description: 'User formatted card', example: '44** **** **** 9000' })
-  @Column({ nullable: true })
-  formattedCardNumber: CardNumberType
-}
+import { getFormattedAddress } from '../../utils/geolocation.utils'
+import { Guest } from '../guest/guest.entity'
+import { Event } from '../event/event.entity'
+import { Location } from '../../types/location.types'
+import { Payment } from '../payment/payment.entity'
 
 @Entity()
 export class User {
@@ -73,10 +58,6 @@ export class User {
   @Column({ enum: SexEnum })
   sex?: SexEnum
 
-  @ApiProperty({ description: 'User paymentToken', example: '' })
-  @Column({ type: 'json', default: [] })
-  payments?: Payment[]
-
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
   @Column({ nullable: true })
   avatar?: string
@@ -85,6 +66,10 @@ export class User {
   @Column({ nullable: true })
   pushNotificationToken?: string
 
+  @ApiProperty({ description: 'User payments', type: () => [Payment], default: [] })
+  @OneToMany(() => Payment, payment => payment.user)
+  payments?: Payment[]
+
   @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)
   events?: Event[]
@@ -92,4 +77,18 @@ export class User {
   @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest], default: [] })
   @OneToMany(() => Guest, guest => guest.event)
   guests?: Guest[]
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async formateAddress() {
+    if (this.location) {
+      const address = await getFormattedAddress(this.location)
+
+      if (!address) {
+        throw new BadRequestException('Invalid location')
+      }
+
+      this.address = address
+    }
+  }
 }

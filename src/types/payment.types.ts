@@ -1,7 +1,5 @@
 export type TokenType = `${string}-${string}-${string}-${string}`
-
 export type CardNumberType = `${string} ${string} ${string} ${string}`
-
 export type ValidateToken = ValidateTokenSuccess | ValidateTokenError
 
 export interface ValidateTokenSuccess {
