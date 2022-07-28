@@ -18,6 +18,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean, IsNumber, Min } from 'class-validator'
 import { getFormattedAddress } from '../../utils/geolocation.utils'
 import { BadRequestException } from '@nestjs/common'
+import { Location } from '../../types/location.types'
 
 export enum TypeEnum {
   Music = 'Music',

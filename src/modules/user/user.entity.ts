@@ -5,29 +5,8 @@ import { ApiProperty } from '@nestjs/swagger'
 import { getFormattedAddress } from '../../utils/geolocation.utils'
 import { Guest } from '../guest/guest.entity'
 import { Event } from '../event/event.entity'
-import { CardNumberType, TokenType } from '../../types/payment.types'
 import { Location } from '../../types/location.types'
-
-class Payment {
-  @ApiProperty({ description: 'User paymentToken', example: '' })
-  @Column({ nullable: true })
-  paymentToken?: TokenType
-
-  @ApiProperty({ description: 'User payment CVV code', example: '123' })
-  @Column({ nullable: true })
-  paymentCVV?: string
-
-  @ApiProperty({ description: 'User payment CVV code', example: 'Kiril Baranov' })
-  @Column({ nullable: true })
-  paymentCardHolder: string
-
-  @ApiProperty({ description: 'User formatted card', example: '44** **** **** 9000' })
-  @Column({ nullable: true })
-  formattedCardNumber: CardNumberType
-
-  @Column({ nullable: false, default: true })
-  isSelected?: boolean
-}
+import { Payment } from '../payment/payment.entity'
 
 @Entity()
 export class User {
@@ -79,10 +58,6 @@ export class User {
   @Column({ enum: SexEnum })
   sex?: SexEnum
 
-  @ApiProperty({ description: 'User paymentToken', example: '' })
-  @Column({ type: 'json', default: [] })
-  payments?: Payment[]
-
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
   @Column({ nullable: true })
   avatar?: string
@@ -90,6 +65,10 @@ export class User {
   @ApiProperty({ description: 'Push notification token', example: 'YOUR NOTIFICATION TOKEN' })
   @Column({ nullable: true })
   pushNotificationToken?: string
+
+  @ApiProperty({ description: 'User payments', type: () => [Payment], default: [] })
+  @OneToMany(() => Payment, payment => payment.user)
+  payments?: Payment[]
 
   @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)

@@ -2,9 +2,10 @@ import { Body, Controller, Get, Post, Put, Query, Req, UploadedFile, UseGuards, 
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { UserService } from './user.service'
 import { User } from './user.entity'
-import { AddCardDto, ChangeUserDto, GetUserDto } from './user.dto'
+import { ChangeUserDto, GetUserDto } from './user.dto'
 import { JwtAuthGuard } from '../auth/auth.guard'
 import { fileInterceptor } from './user.interceptor'
+import { CreatePaymentDto } from '../payment/payment.dto'
 
 @ApiTags('User')
 @Controller('user')
@@ -38,9 +39,23 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ type: Boolean, description: 'Add payment card' })
-  @Post('/add-card')
-  addCard(@Body() dto: AddCardDto, @Req() { user }: Record<'user', User>) {
-    return this.userService.addCard(dto, user)
+  @Post('/add-payment')
+  addCard(@Body() dto: CreatePaymentDto, @Req() { user }: Record<'user', User>) {
+    return this.userService.addPayment(dto, user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: User, description: 'Current user' })
+  @Get('payments')
+  getPayments(@Req() { user }: Record<'user', User>) {
+    return this.userService.getPayments(user.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: User, description: 'Current user' })
+  @Get('payments/selected')
+  getSelectedPayment(@Req() { user }: Record<'user', User>) {
+    return this.userService.getSelectedPayment(user.id)
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,19 +1,17 @@
-import { AddCardDto, ChangeUserDto, CreateUserDto } from './user.dto'
+import { CreateUserDto } from './user.dto'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
-import { getFormattedAddress } from '../../utils/geolocation.utils'
-import { PaymentUtils } from '../../utils/payment.utils'
-import { CardNumberType } from '../../types/payment.types'
+import { PaymentService } from '../payment/payment.service'
+import { CreatePaymentDto } from '../payment/payment.dto'
 
 @Injectable()
 export class UserService {
-  private readonly paymentUtils: PaymentUtils
-
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {
-    this.paymentUtils = new PaymentUtils()
-  }
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly paymentService: PaymentService
+  ) {}
 
   async create(dto: CreateUserDto) {
     return this.userRepository.save(this.userRepository.create(dto))
@@ -25,25 +23,18 @@ export class UserService {
     })
   }
 
-  getBy(key: keyof User, value: User[keyof User], includePayments?: boolean) {
-    return this.userRepository.findOne({ where: { [key]: value }, relations: ['events', 'guests'] }).then(user => {
-      if (!user) {
-        return null
+  getBy(key: keyof User, value: User[keyof User]) {
+    return this.userRepository.findOne({
+      where: { [key]: value },
+      relations: {
+        events: true,
+        guests: true,
+        payments: {
+          formattedCardNumber: true,
+          paymentCardHolder: true,
+          isSelected: true
+        }
       }
-
-      if (includePayments) {
-        return user
-      }
-
-      const newUser = { ...user }
-
-      newUser.payments = user.payments!.map(payment => ({
-        formattedCardNumber: payment.formattedCardNumber,
-        paymentCardHolder: payment.paymentCardHolder,
-        isSelected: payment.isSelected
-      }))
-
-      return newUser
     })
   }
 
@@ -82,40 +73,25 @@ export class UserService {
     return age
   }
 
-  async isCardExists(cardNumber: CardNumberType, user: User) {
-    return user.payments!.some(async payment => {
-      const response = await this.paymentUtils.getTokenInfo(payment.paymentToken!)
-
-      if (response.HasError) {
-        throw new BadRequestException('Token is not valid')
-      }
-
-      return response.CardNumber === cardNumber
-    })
-  }
-
-  async addCard(dto: AddCardDto, user: User) {
-    const response = await this.paymentUtils.createToken({ cardExpiry: dto.cardExpiry, cardNumber: dto.cardNumber })
-
-    if (response.HasError) {
-      throw new BadRequestException(`Error code ${response.ReturnCode}: ${response.ReturnMessage}`)
-    }
-
-    if (await this.isCardExists(dto.cardNumber, user)) {
+  async addPayment(dto: CreatePaymentDto, user: User) {
+    if (!user.payments || (await this.paymentService.isCardExists(dto.cardNumber, user.payments))) {
       throw new BadRequestException('Card already exists')
     }
 
-    user.payments = user.payments!.map(payment => ({ ...payment, selected: false }))
+    await Promise.all(user.payments!.map(async payment => await this.paymentService.unselect(payment)))
 
-    user.payments!.push({
-      paymentToken: response.Token,
-      paymentCVV: dto.cardCVV,
-      paymentCardHolder: dto.cardHolder,
-      formattedCardNumber: PaymentUtils.formatCard(dto.cardNumber)
-    })
+    const newPayment = await this.paymentService.create(dto)
 
-    await this.userRepository.save(user)
+    await this.update({ ...user, payments: [...user.payments, newPayment] })
 
     return Boolean(true)
+  }
+
+  getPayments(id: User['id']) {
+    return this.getBy('id', id).then(user => user?.payments)
+  }
+
+  getSelectedPayment(id: User['id']) {
+    return this.getBy('id', id).then(user => user?.payments?.find(payment => payment.isSelected))
   }
 }

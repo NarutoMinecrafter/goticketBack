@@ -13,6 +13,8 @@ import { Event } from './modules/event/event.entity'
 import { GuestModule } from './modules/guest/guest.module'
 import { Guest } from './modules/guest/guest.entity'
 import { NotificationModule } from './modules/notification/notification.module'
+import { PaymentModule } from './modules/payment/payment.module'
+import { Payment } from './modules/payment/payment.entity'
 
 dotenv.config()
 
@@ -23,7 +25,7 @@ const { PG_URL } = process.env
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: PG_URL,
-      entities: [User, Ticket, Event, Guest],
+      entities: [User, Ticket, Event, Guest, Payment],
       synchronize: true
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'static'), serveRoot: '/static' }),
@@ -32,7 +34,8 @@ const { PG_URL } = process.env
     TicketModule,
     EventModule,
     GuestModule,
-    NotificationModule
+    NotificationModule,
+    PaymentModule
   ]
 })
 export class AppModule {}
