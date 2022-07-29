@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { ILike, Repository } from 'typeorm'
+import { FindOneOptions, ILike, Repository } from 'typeorm'
 import { getDistance } from 'geolib'
 import { scheduleJob } from 'node-schedule'
 import { TicketService } from '../ticket/ticket.service'
@@ -12,6 +12,7 @@ import { sortMap } from '../../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
 import { NotificationService } from '../notification/notification.service'
+import { SexEnum } from '../user/user.dto'
 
 @Injectable()
 export class EventService {
@@ -71,11 +72,7 @@ export class EventService {
   }
 
   async buyTickets({ id, tickets }: BuyTicketsDto, user: User) {
-    const event = await this.getBy('id', id)
-
-    if (!event) {
-      throw new BadRequestException(`Event with id ${id} is not defined!`)
-    }
+    const event = await this.getById(id)
 
     return await Promise.all(tickets.map(async ticket => await this.ticketService.buy({ ...ticket, event, user })))
   }
@@ -218,11 +215,25 @@ export class EventService {
     return filteredEvents
   }
 
-  getBy<T extends keyof Event>(key: T, value: Event[T]) {
+  getBy<T extends keyof Event>(
+    key: T,
+    value: Event[T],
+    relations: FindOneOptions<Event>['relations'] = ['creator', 'tickets', 'editors', 'guests']
+  ) {
     return this.eventRepository.findOne({
       where: { [key]: value },
-      relations: ['creator', 'tickets', 'editors', 'guests']
+      relations
     })
+  }
+
+  private async getById(id: Event['id'], relations?: FindOneOptions<Event>['relations']) {
+    const event = await this.getBy('id', id, relations)
+
+    if (!event) {
+      throw new BadRequestException(`Event with id ${id} is not defined!`)
+    }
+
+    return event
   }
 
   async getByAuthor(authorId: number) {
@@ -232,8 +243,8 @@ export class EventService {
     })
   }
 
-  getTicketsById(id: number) {
-    return this.getBy('id', id).then(event => event?.tickets)
+  getTicketsById(id: Event['id']) {
+    return this.getById(id).then(event => event.tickets)
   }
 
   async getGuestsById(id: number) {
@@ -263,11 +274,7 @@ export class EventService {
   }
 
   async update({ id, editors, ...dto }: ChangeEventDto, user: User) {
-    const event = await this.getBy('id', id)
-
-    if (!event) {
-      throw new BadRequestException(`Event with id ${id} is not defined!`)
-    }
+    const event = await this.getById(id)
 
     if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
       throw new BadRequestException('You do not have permission to edit this event')
@@ -331,5 +338,43 @@ export class EventService {
     const result = await this.guestService.useTicket(guest.id)
 
     return Boolean(result.affected)
+  }
+
+  async statisticTypesOfTickets(id: Event['id']) {
+    const event = await this.getById(id, ['tickets'])
+
+    return event.tickets.map(({ totalCount, currentCount, type }, _index, tickets) => ({
+      [type]: {
+        totalCount,
+        currentCount,
+        percent:
+          (100 * totalCount - currentCount) /
+          tickets.reduce((acc, ticket) => acc + ticket.totalCount - ticket.currentCount, 0)
+      }
+    }))
+  }
+
+  async statisticGuestsVisitors(id: Event['id']) {
+    const event = await this.getById(id, ['guests'])
+
+    return event.guests.reduce(
+      ({ visited, dontVisited }, { isTicketUsed }) => ({
+        visited: visited + (isTicketUsed ? 1 : 0),
+        dontVisited: dontVisited + (isTicketUsed ? 0 : 1)
+      }),
+      { visited: 0, dontVisited: 0 }
+    )
+  }
+
+  async statisticGuestsSex(id: Event['id']) {
+    const event = await this.getById(id, ['guests.user'])
+
+    return event.guests.reduce(
+      (acc, { user }) => ({
+        ...acc,
+        [user.sex]: acc[user.sex] + 1
+      }),
+      { [SexEnum.Women]: 0, [SexEnum.Men]: 0, [SexEnum.Uknown]: 0 }
+    )
   }
 }

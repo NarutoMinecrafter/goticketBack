@@ -18,6 +18,7 @@ import { Event } from './event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { filesInterceptor } from './event.interceptor'
+import { SexEnum } from '../user/user.dto'
 
 @ApiTags('Event')
 @Controller('event')
@@ -118,5 +119,38 @@ export class EventController {
     }
 
     return this.eventService.update(demoLinks?.length ? { ...dto, demoLinks } : dto, user)
+  }
+
+  @ApiOkResponse({
+    schema: {
+      example: {
+        Vip: {
+          totalCount: 100,
+          currentCount: 30,
+          percent: 3
+        },
+        Standart: {
+          totalCount: 100,
+          currentCount: 80,
+          percent: 80
+        }
+      }
+    }
+  })
+  @Get('statistic/type-of-tickets')
+  statisticTypesOfTickets(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticTypesOfTickets(Number(id))
+  }
+
+  @ApiOkResponse({ schema: { example: { visited: 1000, dontVisited: 100 } } })
+  @Get('statistic/guests-visitors')
+  statisticGuestsVisitors(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticGuestsVisitors(Number(id))
+  }
+
+  @ApiOkResponse({ schema: { example: { [SexEnum.Women]: 50, [SexEnum.Men]: 40, [SexEnum.Uknown]: 10 } } })
+  @Get('statistic/guests-sex')
+  statisticGuestsSex(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticGuestsSex(Number(id))
   }
 }
