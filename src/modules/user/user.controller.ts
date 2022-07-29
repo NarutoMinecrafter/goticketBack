@@ -1,4 +1,4 @@
-import { Payment } from './../payment/payment.entity'
+import { Payment } from '../payment/payment.entity'
 import { Body, Controller, Get, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { UserService } from './user.service'
@@ -6,7 +6,7 @@ import { User } from './user.entity'
 import { ChangeUserDto, GetUserDto } from './user.dto'
 import { JwtAuthGuard } from '../auth/auth.guard'
 import { fileInterceptor } from './user.interceptor'
-import { CreatePaymentDto } from '../payment/payment.dto'
+import { CreatePaymentDto, RemovePaymentDto } from '../payment/payment.dto'
 
 @ApiTags('User')
 @Controller('user')
@@ -43,6 +43,13 @@ export class UserController {
   @Post('/add-payment')
   addCard(@Body() dto: CreatePaymentDto, @Req() { user }: Record<'user', User>) {
     return this.userService.addPayment(dto, user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: Boolean, description: 'Add payment card' })
+  @Post('/remove-payment')
+  removeCard(@Body() { id }: RemovePaymentDto, @Req() { user }: Record<'user', User>) {
+    return this.userService.removePayment(id, user)
   }
 
   @UseGuards(JwtAuthGuard)

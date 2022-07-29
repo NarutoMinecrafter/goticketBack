@@ -68,7 +68,7 @@ export class User {
 
   @ApiProperty({ description: 'User payments', type: () => [Payment], default: [] })
   @OneToMany(() => Payment, payment => payment.user)
-  payments?: Payment[]
+  payments: Payment[]
 
   @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)

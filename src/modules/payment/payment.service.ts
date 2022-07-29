@@ -5,6 +5,7 @@ import { CardNumberType } from '../../types/payment.types'
 import { PaymentUtils } from '../../utils/payment.utils'
 import { CreatePaymentDto } from './payment.dto'
 import { Payment } from './payment.entity'
+import { User } from '../user/user.entity'
 
 @Injectable()
 export class PaymentService {
@@ -15,30 +16,37 @@ export class PaymentService {
   }
 
   async isCardExists(cardNumber: CardNumberType, payments: Payment[]) {
-    return payments!.some(async payment => {
-      const response = await this.paymentUtils.getTokenInfo(payment.paymentToken!)
+    const values = await Promise.all(
+      payments.map(async payment => {
+        const response = await this.paymentUtils.getTokenInfo(payment.paymentToken!)
 
-      if (response.HasError) {
-        throw new BadRequestException('Token is not valid')
-      }
+        if (response.HasError) {
+          throw new BadRequestException('Token is not valid')
+        }
 
-      return response.CardNumber === cardNumber
-    })
+        return response.CardNumber === cardNumber
+      })
+    )
+
+    return values.some(value => value)
   }
 
-  async create(dto: CreatePaymentDto) {
+  async create(dto: CreatePaymentDto, user: User) {
     const response = await this.paymentUtils.createToken({ cardExpiry: dto.cardExpiry, cardNumber: dto.cardNumber })
 
     if (response.HasError) {
       throw new BadRequestException(`Error code ${response.ReturnCode}: ${response.ReturnMessage}`)
     }
 
-    return this.paymentRepository.create({
-      paymentToken: response.Token,
-      paymentCVV: dto.cardCVV,
-      paymentCardHolder: dto.cardHolder,
-      formattedCardNumber: PaymentUtils.formatCard(dto.cardNumber)
-    })
+    return this.paymentRepository.save(
+      this.paymentRepository.create({
+        paymentToken: response.Token,
+        paymentCVV: dto.cardCVV,
+        paymentCardHolder: dto.cardHolder,
+        formattedCardNumber: PaymentUtils.formatCard(dto.cardNumber),
+        user
+      })
+    )
   }
 
   update(payment: Partial<Payment> & Record<'id', Payment['id']>) {
