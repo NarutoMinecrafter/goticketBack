@@ -35,7 +35,7 @@ export class User {
   birthdate?: Date
 
   @ApiProperty({ description: 'User ID Code', example: '228' })
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   IDcode?: string
 
   @ApiProperty({ description: 'String address', example: 'Kiyiv' })
@@ -55,7 +55,7 @@ export class User {
   aboutMe?: string
 
   @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
-  @Column({ enum: SexEnum })
+  @Column({ enum: SexEnum, nullable: true })
   sex?: SexEnum
 
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
