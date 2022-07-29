@@ -54,9 +54,9 @@ export class User {
   @Column({ nullable: true })
   aboutMe?: string
 
-  @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
-  @Column({ enum: SexEnum })
-  sex?: SexEnum
+  @ApiProperty({ description: 'User sex', example: SexEnum.Women })
+  @Column({ enum: SexEnum, default: SexEnum.Uknown })
+  sex: SexEnum
 
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
   @Column({ nullable: true })
