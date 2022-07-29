@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsCreditCard, IsNotEmpty, IsNumberString, IsString, Length, Matches } from 'class-validator'
+import { IsCreditCard, IsNotEmpty, IsNumber, IsNumberString, IsString, Length, Matches } from 'class-validator'
 import { CardNumberType } from '../../types/payment.types'
 
 const CARD_EXPIRY_DATE = /^(0[1-9]|1[0-2])(2[2-9])$/
@@ -27,4 +27,11 @@ export class CreatePaymentDto {
   @IsString()
   @IsNotEmpty()
   readonly cardHolder: string
+}
+
+export class RemovePaymentDto {
+  @ApiProperty({ example: 123, description: 'Payment id', required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly id: number
 }

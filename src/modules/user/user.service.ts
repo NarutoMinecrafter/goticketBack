@@ -66,15 +66,29 @@ export class UserService {
   }
 
   async addPayment(dto: CreatePaymentDto, user: User) {
-    if (!user.payments || (await this.paymentService.isCardExists(dto.cardNumber, user.payments))) {
+    if (await this.paymentService.isCardExists(dto.cardNumber, user.payments)) {
       throw new BadRequestException('Card already exists')
     }
 
-    await Promise.all(user.payments!.map(async payment => await this.paymentService.unselect(payment)))
+    console.log(user.payments)
 
-    const newPayment = await this.paymentService.create(dto)
+    await Promise.all(user.payments.map(async payment => await this.paymentService.unselect(payment)))
 
-    await this.update({ ...user, payments: [...user.payments, newPayment] })
+    await this.paymentService.create(dto, user)
+
+    return Boolean(true)
+  }
+
+  async removePayment(id: number, user: User) {
+    const payment = user.payments.find(payment => payment.id === id)
+
+    if (!payment) {
+      throw new Error('Payment not found')
+    }
+
+    user.payments = user.payments.filter(p => p.id !== payment.id)
+
+    await this.userRepository.save(user)
 
     return Boolean(true)
   }
