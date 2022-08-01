@@ -80,7 +80,7 @@ export class User {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async formateAddress() {
+  async formatAddress() {
     if (this.location) {
       const address = await getFormattedAddress(this.location)
 
