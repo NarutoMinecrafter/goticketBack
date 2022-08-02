@@ -42,7 +42,7 @@ export class CreateEventDto {
   @ApiProperty({ example: 'Very cool anime festival', description: 'Full description', required: false })
   @IsString()
   @IsOptional()
-  readonly fullDescription: string
+  readonly fullDescription?: string
 
   @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Start date' })
   @IsDateString()
@@ -56,35 +56,35 @@ export class CreateEventDto {
 
   @ApiProperty({ example: [], description: 'Demo videos or pictures', required: false })
   @IsArray()
+  @ArrayMaxSize(3)
   @IsOptional()
-  @ArrayMaxSize(3)
-  readonly files: Express.Multer.File[]
-
-  @ApiProperty({ example: ['https://youtu.be/dQw4w9WgXcQ'], description: 'Demo videos or pictures', required: false })
-  @IsArray()
-  @ArrayMaxSize(3)
-  readonly demoLinks: string[]
+  readonly files?: Express.Multer.File[]
 
   @ApiProperty({ example: [TypeEnum.Festival], isArray: true, description: 'Event type array', enum: TypeEnum })
   @IsArray()
   @ArrayNotEmpty()
   @ArrayMinSize(1)
-  type: TypeEnum[]
+  type!: TypeEnum[]
 
-  @ApiProperty({ example: '5555', description: 'Bank account' })
-  @IsString()
-  @IsNotEmpty()
-  readonly bank: string
+  @ApiProperty({ example: ['111'], description: 'Bank accounts' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMinSize(1)
+  readonly bank: string[]
+
+  @IsArray()
+  @ArrayMaxSize(3)
+  readonly demoLinks: string[]
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
   @IsBoolean()
   @IsOptional()
-  isPrivate: boolean
+  isPrivate?: boolean
 
   @ApiProperty({ description: 'Whether the event is hidden', example: false, required: false })
   @IsBoolean()
   @IsOptional()
-  isHidden: boolean
+  isHidden?: boolean
 
   @ApiProperty({
     example: () => RequiredAdditionalInfoDto,
@@ -93,6 +93,7 @@ export class CreateEventDto {
     required: false
   })
   @IsObject()
+  @IsOptional()
   readonly requiredAdditionalInfo?: RequiredAdditionalInfoDto
 
   @ApiProperty({
@@ -101,12 +102,12 @@ export class CreateEventDto {
   })
   @IsObject()
   @IsNotEmptyObject()
-  readonly location: Location
+  readonly location!: Location
 
   @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
   @IsArray()
   @IsNotEmpty()
-  readonly tickets: CreateTicketDto[]
+  readonly tickets!: CreateTicketDto[]
 
   @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
   @IsArray()

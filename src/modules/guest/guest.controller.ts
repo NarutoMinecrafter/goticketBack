@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common'
-import { ApiOkResponse, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger'
 import { ChangeGuestStatusDto, GetGuestDto } from './guest.dto'
 import { Guest } from './guest.entity'
 import { GuestService } from './guest.service'
@@ -27,6 +27,7 @@ export class GuestController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({ type: Boolean, description: 'Accept guest' })
   @Put('status')
   getBy(@Body() dto: ChangeGuestStatusDto, @Req() { user }: Record<'user', User>) {

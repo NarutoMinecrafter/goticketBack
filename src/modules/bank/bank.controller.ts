@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Query, Req, UseGuards } from '@nestjs/common'
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/auth.guard'
-import { Event } from '../event/event.entity'
 import { User } from '../user/user.entity'
 import { CreateBankAccountDto, DeleteBankAccountDto, GetBankAccountDto } from './bank.dto'
 import { BankAccountService } from './bank.service'
@@ -13,20 +12,20 @@ export class BankAccountController {
   constructor(private readonly bankAccountService: BankAccountService) {}
 
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: Event, description: 'Create Bank account' })
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: BankAccount, description: 'Bank account with specified id' })
+  @ApiResponse({ type: BankAccount, isArray: true, description: 'All user back accounts if id is not specified' })
   @Get()
-  getAll(@Req() { user }: Record<'user', User>) {
+  get(@Req() { user }: Record<'user', User>, @Query() { id }: GetBankAccountDto) {
+    if (id) {
+      return this.bankAccountService.getBy('id', Number(id))
+    }
+
     return this.bankAccountService.getByUserId(user.id)
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: Event, description: 'Create Bank account' })
-  @Get()
-  getById(@Query() { id }: GetBankAccountDto) {
-    return this.bankAccountService.getBy('id', Number(id))
-  }
-
-  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: BankAccount, description: 'Create Bank account' })
   @Post()
   create(@Body() dto: CreateBankAccountDto, @Req() { user }: Record<'user', User>) {
@@ -34,9 +33,10 @@ export class BankAccountController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Boolean, description: 'Delete Bank account' })
   @Delete()
-  delete(@Body() dto: DeleteBankAccountDto, @Req() { user }: Record<'user', User>) {
-    return this.bankAccountService.delete(dto.id, user)
+  delete(@Body() { id }: DeleteBankAccountDto, @Req() { user }: Record<'user', User>) {
+    return this.bankAccountService.delete(id, user)
   }
 }

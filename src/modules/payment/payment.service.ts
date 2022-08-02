@@ -64,4 +64,8 @@ export class PaymentService {
       return this.update({ ...payment, isSelected: false })
     }
   }
+
+  delete(id: Payment['id']) {
+    return this.paymentRepository.delete(id)
+  }
 }

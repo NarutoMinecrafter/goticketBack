@@ -1,4 +1,4 @@
-import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { rm } from 'fs/promises'
 import { join } from 'path'
 import { Body, Controller, Get, Post, Put, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common'
@@ -26,6 +26,7 @@ export class EventController {
   constructor(private readonly eventService: EventService) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Event, description: 'Created event' })
   @Post()
   @UseInterceptors(filesInterceptor)
@@ -63,13 +64,15 @@ export class EventController {
   }
 
   @UseGuards(JwtAuthGuard)
-  // @ApiResponse()
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: Boolean, description: 'Use ticket' })
   @Post('use-ticket')
   useTicket(@Body() dto: UseTicketDto, @Req() { user }: Record<'user', User>) {
     return this.eventService.useTicket(dto, user)
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: User, isArray: true, description: 'Current user events' })
   @Get('me')
   getMyEvents(@Req() { user }: Record<'user', User>) {
@@ -89,6 +92,7 @@ export class EventController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Event, isArray: true, description: 'Get events where current user a guest' })
   @Get('guests/me')
   getEventsByGuestsAsMe(@Req() { user }: Record<'user', User>) {
@@ -96,6 +100,7 @@ export class EventController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Guest, isArray: true, description: 'Guests after buy tickets' })
   @Post('buy-tickets')
   buyTickets(@Body() dto: BuyTicketsDto, @Req() { user }: Record<'user', User>) {
@@ -103,6 +108,7 @@ export class EventController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Boolean, description: 'Change event values' })
   @Put()
   @UseInterceptors(filesInterceptor)

@@ -1,3 +1,4 @@
+import { BankAccount } from './../bank/bank.entity'
 import { BadRequestException } from '@nestjs/common'
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { SexEnum } from './user.dto'
@@ -69,6 +70,10 @@ export class User {
   @ApiProperty({ description: 'User payments', type: () => [Payment], default: [] })
   @OneToMany(() => Payment, payment => payment.user)
   payments: Payment[]
+
+  @ApiProperty({ description: 'User bank accounts', type: () => [BankAccount], default: [] })
+  @OneToMany(() => BankAccount, bank => bank.user)
+  bankAccounts: BankAccount[]
 
   @ApiProperty({ description: 'User events', type: () => [Event], default: [] })
   @OneToMany(() => Event, event => event.creator)
