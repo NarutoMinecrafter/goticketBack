@@ -15,6 +15,7 @@ import { Guest } from './modules/guest/guest.entity'
 import { NotificationModule } from './modules/notification/notification.module'
 import { PaymentModule } from './modules/payment/payment.module'
 import { Payment } from './modules/payment/payment.entity'
+import { BankModule } from './modules/bank/bank.module'
 
 dotenv.config()
 
@@ -35,7 +36,8 @@ const { PG_URL } = process.env
     EventModule,
     GuestModule,
     NotificationModule,
-    PaymentModule
+    PaymentModule,
+    BankModule
   ]
 })
 export class AppModule {}
