@@ -35,7 +35,7 @@ export class User {
   birthdate?: Date
 
   @ApiProperty({ description: 'User ID Code', example: '228' })
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true })
   IDcode?: string
 
   @ApiProperty({ description: 'String address', example: 'Kiyiv' })
@@ -54,9 +54,9 @@ export class User {
   @Column({ nullable: true })
   aboutMe?: string
 
-  @ApiProperty({ description: 'User sex', example: SexEnum.Woman })
-  @Column({ enum: SexEnum, nullable: true })
-  sex?: SexEnum
+  @ApiProperty({ description: 'User sex', example: SexEnum.Women })
+  @Column({ enum: SexEnum, default: SexEnum.Uknown })
+  sex: SexEnum
 
   @ApiProperty({ description: 'User avatar link', example: 'https://cutt.ly/aLyxInS' })
   @Column({ nullable: true })
@@ -80,7 +80,7 @@ export class User {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async formatAddress() {
+  async formateAddress() {
     if (this.location) {
       const address = await getFormattedAddress(this.location)
 

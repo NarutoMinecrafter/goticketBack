@@ -14,8 +14,9 @@ import {
 import { Location } from '../../types/location.types'
 
 export enum SexEnum {
-  Man = 'man',
-  Woman = 'woman'
+  Men = 'men',
+  Women = 'women',
+  Uknown = 'uknown'
 }
 
 export class CreateUserDto {
@@ -69,7 +70,7 @@ export class CreateUserDto {
   @IsOptional()
   readonly aboutMe?: string
 
-  @ApiProperty({ example: SexEnum.Man, description: 'Sex', enum: SexEnum })
+  @ApiProperty({ example: SexEnum.Men, description: 'Sex', enum: SexEnum })
   @IsOptional()
   @IsEnum(SexEnum)
   readonly sex?: SexEnum
