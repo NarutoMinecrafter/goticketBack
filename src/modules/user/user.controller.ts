@@ -1,6 +1,18 @@
 import { Payment } from '../payment/payment.entity'
-import { Body, Controller, Get, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
-import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common'
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { UserService } from './user.service'
 import { User } from './user.entity'
 import { ChangeUserDto, GetUserDto } from './user.dto'
@@ -25,6 +37,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: User, description: 'Current user' })
   @Get('profile')
   profile(@Req() { user }: Record<'user', User>) {
@@ -32,6 +45,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Boolean, description: 'Change current user ' })
   @Put('profile')
   change(@Body() dto: ChangeUserDto, @Req() { user }: Record<'user', User>) {
@@ -39,6 +53,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({ type: Boolean, description: 'Add payment card' })
   @Post('/add-payment')
   addCard(@Body() dto: CreatePaymentDto, @Req() { user }: Record<'user', User>) {
@@ -46,13 +61,15 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({ type: Boolean, description: 'Add payment card' })
-  @Post('/remove-payment')
-  removeCard(@Body() { id }: RemovePaymentDto, @Req() { user }: Record<'user', User>) {
+  @Delete('/payments')
+  removeCard(@Query() { id }: RemovePaymentDto, @Req() { user }: Record<'user', User>) {
     return this.userService.removePayment(id, user)
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Payment, isArray: true, description: 'Current user payments' })
   @Get('payments')
   getPayments(@Req() { user }: Record<'user', User>) {
@@ -60,6 +77,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: Payment, description: 'Current user selected payment' })
   @Get('payments/selected')
   getSelectedPayment(@Req() { user }: Record<'user', User>) {
@@ -67,6 +85,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Put('avatar')
   @UseInterceptors(fileInterceptor)
   uploadAvatar(@UploadedFile() file: Express.Multer.File, @Req() { user }: Record<'user', User>) {

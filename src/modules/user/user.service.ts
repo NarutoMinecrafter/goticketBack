@@ -70,8 +70,6 @@ export class UserService {
       throw new BadRequestException('Card already exists')
     }
 
-    console.log(user.payments)
-
     await Promise.all(user.payments.map(async payment => await this.paymentService.unselect(payment)))
 
     await this.paymentService.create(dto, user)
@@ -87,6 +85,8 @@ export class UserService {
     }
 
     user.payments = user.payments.filter(p => p.id !== payment.id)
+
+    await this.paymentService.delete(payment.id)
 
     await this.userRepository.save(user)
 

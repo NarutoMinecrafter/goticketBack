@@ -122,8 +122,8 @@ export class Event {
   address: string
 
   @ApiProperty({ description: 'Bank Id', example: '5555' })
-  @Column({ nullable: false })
-  bank!: string
+  @Column('text', { nullable: false, array: true })
+  bank!: string[]
 
   @ApiProperty({ description: 'Is private event', example: false })
   @Column('bool', { default: false })
