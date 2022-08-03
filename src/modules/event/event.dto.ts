@@ -1,4 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { Transform } from 'class-transformer'
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -77,11 +78,13 @@ export class CreateEventDto {
   readonly demoLinks: string[]
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
+  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
   @IsBoolean()
   @IsOptional()
   isPrivate?: boolean
 
   @ApiProperty({ description: 'Whether the event is hidden', example: false, required: false })
+  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
   @IsBoolean()
   @IsOptional()
   isHidden?: boolean
