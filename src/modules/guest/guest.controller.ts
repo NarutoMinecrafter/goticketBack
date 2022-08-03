@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger'
 import { ChangeGuestStatusDto, GetGuestDto } from './guest.dto'
 import { Guest } from './guest.entity'
@@ -20,10 +20,14 @@ export class GuestController {
   @Get()
   get(@Query() { id, eventId }: GetGuestDto) {
     if (id) {
-      return this.guestService.getBy('id', Number(id))
+      return this.guestService.getBy('id', id)
     }
 
-    return this.guestService.getByEventId(Number(eventId))
+    if (eventId) {
+      return this.guestService.getByEventId(eventId)
+    }
+
+    throw new BadRequestException('Please input guest id or event id')
   }
 
   @UseGuards(JwtAuthGuard)

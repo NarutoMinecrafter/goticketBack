@@ -18,7 +18,7 @@ export class BankAccountController {
   @Get()
   get(@Req() { user }: Record<'user', User>, @Query() { id }: GetBankAccountDto) {
     if (id) {
-      return this.bankAccountService.getBy('id', Number(id))
+      return this.bankAccountService.getBy('id', id)
     }
 
     return this.bankAccountService.getByUserId(user.id)

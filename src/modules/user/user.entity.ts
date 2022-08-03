@@ -28,7 +28,7 @@ export class User {
   phone!: string
 
   @ApiProperty({ description: 'User email', example: 'J3BA1T3D' })
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email?: string
 
   @ApiProperty({ description: 'User birthdate', example: '25.01.1978' })
@@ -36,7 +36,7 @@ export class User {
   birthdate?: Date
 
   @ApiProperty({ description: 'User ID Code', example: '228' })
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   IDcode?: string
 
   @ApiProperty({ description: 'String address', example: 'Kiyiv' })

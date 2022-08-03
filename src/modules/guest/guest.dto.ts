@@ -1,34 +1,48 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator'
+import { ToNumber } from '../../decorators/ToNumber'
 import { Event } from '../event/event.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { User } from '../user/user.entity'
 import { GuestStatus, PaymentStatus } from './guest.entity'
 
 export class CreateGuestDto {
-  @IsNotEmpty()
+  @IsObject()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => User)
   user: User
 
-  @IsNotEmpty()
+  @IsObject()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => Event)
   event: Event
 
-  @IsNotEmpty()
+  @IsObject()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => Event)
   ticket: Ticket
 
+  @IsEnum(PaymentStatus)
   @IsOptional()
   paymentStatus?: PaymentStatus
 }
 
 export class RequiredGuestDto {
-  @ApiProperty({ example: '1', description: 'Guest id', required: true })
+  @ApiProperty({ example: 1, description: 'Guest id', required: true })
+  @ToNumber()
   @IsNotEmpty()
-  @IsNumberString()
-  readonly id: string
+  @IsNumber()
+  readonly id: number
 
-  @ApiProperty({ example: '1', description: 'Event id', required: true })
+  @ApiProperty({ example: 1, description: 'Event id', required: true })
+  @ToNumber()
   @IsNotEmpty()
-  @IsNumberString()
-  readonly eventId: string
+  @IsNumber()
+  readonly eventId: number
 }
 
 export class GetGuestDto extends PartialType(RequiredGuestDto) {}

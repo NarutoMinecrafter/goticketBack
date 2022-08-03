@@ -17,7 +17,7 @@ export class TicketController {
   @Get()
   get(@Query() { id }: GetTicketDto) {
     if (id) {
-      return this.ticketService.getBy('id', Number(id))
+      return this.ticketService.getBy('id', id)
     }
 
     return this.ticketService.getAll()
@@ -33,6 +33,6 @@ export class TicketController {
   @ApiOkResponse({ type: Guest, description: 'Guests by ticket id' })
   @Get('guests')
   getGuests(@Query() { id }: GetByTicketIdDto) {
-    return this.ticketService.getGuestsById(Number(id))
+    return this.ticketService.getGuestsById(id)
   }
 }

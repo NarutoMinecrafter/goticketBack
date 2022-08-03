@@ -1,16 +1,21 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
 import {
-  IsDateString,
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsNumberString,
   IsObject,
   IsOptional,
   IsPhoneNumber,
   IsString,
-  MinLength
+  MinLength,
+  ValidateNested
 } from 'class-validator'
+import { ToDate } from '../../decorators/ToDate'
+import { ToNumber } from '../../decorators/ToNumber'
 import { Location } from '../../types/location.types'
 
 export enum SexEnum {
@@ -39,26 +44,29 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'example@gmail.com', description: 'Email' })
   @IsEmail()
-  @IsOptional()
-  readonly email: string
+  @IsNotEmpty()
+  readonly email!: string
 
   @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Birthdate' })
+  @ToDate()
+  @IsDate()
   @IsOptional()
-  @IsDateString()
-  readonly birthdate: Date
+  readonly birthdate?: Date
 
   @ApiProperty({
     example: { lat: 48.187019, lon: 23.88558 },
     description: 'User latitude/longitude location'
   })
   @IsObject()
+  @ValidateNested()
+  @Type(() => Location)
   @IsOptional()
-  readonly location: Location
+  readonly location?: Location
 
   @ApiProperty({ example: '9999', description: 'ID code' })
   @IsNumberString()
   @IsOptional()
-  readonly IDcode: string
+  readonly IDcode?: string
 
   @ApiProperty({ example: '@example', description: 'Instagram' })
   @IsString()
@@ -71,16 +79,17 @@ export class CreateUserDto {
   readonly aboutMe?: string
 
   @ApiProperty({ example: SexEnum.Men, description: 'Sex', enum: SexEnum })
-  @IsOptional()
   @IsEnum(SexEnum)
+  @IsOptional()
   readonly sex?: SexEnum
 }
 
 export class GetUserDto {
   @ApiProperty({ example: 1, description: 'User id', required: false })
-  @IsNumberString()
+  @ToNumber()
+  @IsNumber()
   @IsOptional()
-  readonly id?: string
+  readonly id?: number
 }
 
 export class ChangeUserDto extends PartialType(CreateUserDto) {}

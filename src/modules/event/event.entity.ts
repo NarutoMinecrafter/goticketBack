@@ -15,10 +15,12 @@ import { User } from '../user/user.entity'
 import { Ticket } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsBoolean, IsNumber, Min } from 'class-validator'
+import { IsBoolean, IsNumber, IsOptional, Min } from 'class-validator'
 import { getFormattedAddress } from '../../utils/geolocation.utils'
 import { BadRequestException } from '@nestjs/common'
 import { Location } from '../../types/location.types'
+import { ToBolean } from '../../decorators/ToBolean'
+import { ToNumber } from '../../decorators/ToNumber'
 
 export enum TypeEnum {
   Music = 'Music',
@@ -37,16 +39,22 @@ export enum TypeEnum {
 
 export class RequiredAdditionalInfoDto {
   @ApiProperty({ description: 'Does a person have to indicate age to buy this ticket', example: true, default: false })
+  @ToBolean()
   @IsBoolean()
+  @IsOptional()
   isAgeRequired = false
 
   @ApiProperty({ description: 'Minimum user age to purchase tickets', example: 18, default: 0 })
+  @ToNumber()
   @Min(0)
   @IsNumber()
+  @IsOptional()
   minRequiredAge = 0
 
   @ApiProperty({ description: 'Does a person have to indicate sex to buy this ticket', example: false, default: false })
+  @ToBolean()
   @IsBoolean()
+  @IsOptional()
   isSexRequired = false
 
   @ApiProperty({
@@ -54,7 +62,9 @@ export class RequiredAdditionalInfoDto {
     example: false,
     default: false
   })
+  @ToBolean()
   @IsBoolean()
+  @IsOptional()
   isIDCodeRequired = false
 
   @ApiProperty({
@@ -62,7 +72,9 @@ export class RequiredAdditionalInfoDto {
     example: false,
     default: false
   })
+  @ToBolean()
   @IsBoolean()
+  @IsOptional()
   isInstagramRequired = false
 }
 
