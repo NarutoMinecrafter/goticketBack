@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
+import { ToNumber } from '../../decorators/ToNumber'
 
 export class GetBankAccountDto {
   @ApiProperty({ description: 'Bank account id', example: '123' })
-  @IsNumberString()
+  @ToNumber()
+  @IsNumber()
   @IsNotEmpty()
-  id: string
+  id: number
 }
 
 export class CreateBankAccountDto {
@@ -24,7 +26,7 @@ export class CreateBankAccountDto {
   @IsOptional()
   bankNumber?: string
 
-  @ApiProperty({ description: 'Bank account number', example: '123' })
+  @ApiProperty({ description: 'Bank account number', example: 123 })
   @IsString()
   @IsOptional()
   bankAccountNumber?: string

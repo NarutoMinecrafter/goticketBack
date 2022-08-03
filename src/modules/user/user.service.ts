@@ -14,6 +14,14 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto) {
+    await Promise.all(
+      ['phone', 'email', dto.IDcode && 'IDCode', dto.email && 'email'].map(async key => {
+        if (key && (await this.getBy(key as keyof User, dto[key as keyof CreateUserDto]))) {
+          throw new BadRequestException(`User with ${key} ${dto[key as keyof CreateUserDto]} already exist`)
+        }
+      })
+    )
+
     return this.userRepository.save(this.userRepository.create(dto))
   }
 

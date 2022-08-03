@@ -1,23 +1,25 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { Transform } from 'class-transformer'
+import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
   ArrayMinSize,
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
-  IsBooleanString,
-  IsDateString,
+  IsDate,
   IsEnum,
   IsLatLong,
   IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
-  IsNumberString,
   IsObject,
   IsOptional,
-  IsString
+  IsString,
+  ValidateNested
 } from 'class-validator'
+import { ToBolean } from '../../decorators/ToBolean'
+import { ToDate } from '../../decorators/ToDate'
+import { ToNumber } from '../../decorators/ToNumber'
 import { Location, StringLocation } from '../../types/location.types'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
 import { RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
@@ -46,12 +48,14 @@ export class CreateEventDto {
   readonly fullDescription?: string
 
   @ApiProperty({ example: '2022-02-24T02:00:00.777Z', description: 'Start date' })
-  @IsDateString()
+  @ToDate()
+  @IsDate()
   @IsNotEmpty()
   readonly startDate!: string
 
   @ApiProperty({ example: '2022-02-27T02:00:00.777Z', description: 'End date' })
-  @IsDateString()
+  @ToDate()
+  @IsDate()
   @IsNotEmpty()
   readonly endDate!: string
 
@@ -64,27 +68,29 @@ export class CreateEventDto {
   @ApiProperty({ example: [TypeEnum.Festival], isArray: true, description: 'Event type array', enum: TypeEnum })
   @IsArray()
   @ArrayNotEmpty()
-  @ArrayMinSize(1)
+  @IsEnum(TypeEnum, { each: true })
   type!: TypeEnum[]
 
   @ApiProperty({ example: ['111'], description: 'Bank accounts' })
   @IsArray()
+  @IsString({ each: true })
   @ArrayNotEmpty()
   @ArrayMinSize(1)
   readonly bank: string[]
 
   @IsArray()
+  @IsString({ each: true })
   @ArrayMaxSize(3)
   readonly demoLinks: string[]
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
-  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
+  @ToBolean()
   @IsBoolean()
   @IsOptional()
   isPrivate?: boolean
 
   @ApiProperty({ description: 'Whether the event is hidden', example: false, required: false })
-  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
+  @ToBolean()
   @IsBoolean()
   @IsOptional()
   isHidden?: boolean
@@ -96,6 +102,8 @@ export class CreateEventDto {
     required: false
   })
   @IsObject()
+  @ValidateNested()
+  @Type(() => RequiredAdditionalInfoDto)
   @IsOptional()
   readonly requiredAdditionalInfo?: RequiredAdditionalInfoDto
 
@@ -105,29 +113,36 @@ export class CreateEventDto {
   })
   @IsObject()
   @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => Location)
   readonly location!: Location
 
   @ApiProperty({ type: [CreateTicketDto], description: 'Array of tickets' })
   @IsArray()
-  @IsNotEmpty()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => CreateTicketDto)
   readonly tickets!: CreateTicketDto[]
 
   @ApiProperty({ description: 'Discount coupons', example: ['ZPFK'] })
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   readonly coupons?: string[]
 
   @ApiProperty({ description: 'Array of editors user id', example: [123, 32], required: false })
   @IsArray()
+  @IsNumber({}, { each: true })
   @IsOptional()
   readonly editors?: number[]
 }
 
 export class GetEventDto {
-  @ApiProperty({ example: '42', description: 'Event id', required: false })
+  @ApiProperty({ example: 42, description: 'Event id', required: false })
+  @ToNumber()
+  @IsNumber()
   @IsOptional()
-  @IsNumberString()
-  readonly id?: string
+  readonly id?: number
 
   @ApiProperty({ example: 'Minecone', description: 'Search by query', required: false })
   @IsOptional()
@@ -153,7 +168,8 @@ export class GetEventDto {
     description: `Filter by date from this`,
     required: false
   })
-  @IsDateString()
+  @ToDate()
+  @IsDate()
   @IsOptional()
   readonly dateFrom?: string
 
@@ -162,7 +178,8 @@ export class GetEventDto {
     description: `Filter by date to this`,
     required: false
   })
-  @IsDateString()
+  @ToDate()
+  @IsDate()
   @IsOptional()
   readonly dateTo?: string
 
@@ -180,9 +197,10 @@ export class GetEventDto {
     description: `Filter by place`,
     required: false
   })
-  @IsNumberString()
+  @ToNumber()
+  @IsNumber()
   @IsOptional()
-  readonly placeNearInMeters?: string
+  readonly placeNearInMeters?: number
 
   @ApiProperty({
     example: 'Music,Concert',
@@ -198,16 +216,18 @@ export class GetEventDto {
     description: `Filter by only in stock tickets`,
     required: false
   })
-  @IsBooleanString()
+  @ToBolean()
+  @IsBoolean()
   @IsOptional()
   readonly onlyInStock?: string
 }
 
 export class GetByEventIdDto {
   @ApiProperty({ example: '1', description: 'Event id' })
-  @IsNumberString()
+  @ToNumber()
+  @IsNumber()
   @IsNotEmpty()
-  readonly id: string
+  readonly id: number
 }
 
 export class BuyTicketsDto {
@@ -219,6 +239,8 @@ export class BuyTicketsDto {
   @ApiProperty({ type: [BuyTicketDto], description: 'Array of tickets' })
   @IsArray()
   @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => BuyTicketDto)
   readonly tickets!: BuyTicketDto[]
 }
 

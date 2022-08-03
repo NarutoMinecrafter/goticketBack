@@ -44,7 +44,7 @@ export class EventController {
   @Get()
   get(@Query() { id, ...dto }: GetEventDto) {
     if (id) {
-      return this.eventService.getBy('id', Number(id))
+      return this.eventService.getBy('id', id)
     }
 
     return this.eventService.getAll(dto)
@@ -82,13 +82,13 @@ export class EventController {
   @ApiOkResponse({ type: Ticket, description: 'Tickets by event id' })
   @Get('tickets')
   getTickets(@Query() { id }: GetByEventIdDto) {
-    return this.eventService.getTicketsById(Number(id))
+    return this.eventService.getTicketsById(id)
   }
 
   @ApiOkResponse({ type: Guest, description: 'Guests by event id' })
   @Get('guests')
   getGuests(@Query() { id }: GetByEventIdDto) {
-    return this.eventService.getGuestsById(Number(id))
+    return this.eventService.getGuestsById(id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -145,18 +145,18 @@ export class EventController {
   })
   @Get('statistic/type-of-tickets')
   statisticTypesOfTickets(@Query() { id }: GetByEventIdDto) {
-    return this.eventService.statisticTypesOfTickets(Number(id))
+    return this.eventService.statisticTypesOfTickets(id)
   }
 
   @ApiOkResponse({ schema: { example: { visited: 1000, dontVisited: 100 } } })
   @Get('statistic/guests-visitors')
   statisticGuestsVisitors(@Query() { id }: GetByEventIdDto) {
-    return this.eventService.statisticGuestsVisitors(Number(id))
+    return this.eventService.statisticGuestsVisitors(id)
   }
 
   @ApiOkResponse({ schema: { example: { [SexEnum.Women]: 50, [SexEnum.Men]: 40, [SexEnum.Uknown]: 10 } } })
   @Get('statistic/guests-sex')
   statisticGuestsSex(@Query() { id }: GetByEventIdDto) {
-    return this.eventService.statisticGuestsSex(Number(id))
+    return this.eventService.statisticGuestsSex(id)
   }
 }

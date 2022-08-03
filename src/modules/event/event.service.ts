@@ -162,7 +162,7 @@ export class EventService {
           { latitude: userLatitude, longitude: userLongitude }
         )
 
-        filtered.location = distance <= Number(placeNearInMeters)
+        filtered.location = distance <= placeNearInMeters
       }
 
       if (eventType) {
