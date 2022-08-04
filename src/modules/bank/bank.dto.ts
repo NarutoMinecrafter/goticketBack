@@ -6,7 +6,7 @@ export class GetBankAccountDto {
   @ApiProperty({ description: 'Bank account id', example: '123' })
   @ToNumber()
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   id: number
 }
 
