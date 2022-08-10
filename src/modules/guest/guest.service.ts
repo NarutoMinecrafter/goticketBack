@@ -5,7 +5,8 @@ import { Repository } from 'typeorm'
 import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
 import { PaymentUtils } from '../../utils/payment.utils'
-import { NotificationService } from './../notification/notification.service'
+import { NotificationService } from '../notification/notification.service'
+import { Permissions } from '../event/event.entity'
 
 @Injectable()
 export class GuestService {
@@ -51,8 +52,13 @@ export class GuestService {
       throw new BadRequestException('Guest not found')
     }
 
-    if (guest.event.creator.id !== user.id && !guest.event.editors.some(editor => editor.id === user.id)) {
-      throw new ForbiddenException('You are not the owner of this event')
+    const isCreator = user.id === guest.event.creator.id
+    const isEditor = guest.event.editors.some(
+      editor => editor.user.id === user.id && editor.permissions.includes(Permissions.GuestConfirmation)
+    )
+
+    if (!isCreator && !isEditor) {
+      throw new ForbiddenException('You do not have permission to edit the guests of this event')
     }
 
     if (dto.status === GuestStatus.Accepted && guest.paymentStatus !== PaymentStatus.BOOKED) {
@@ -82,10 +88,12 @@ export class GuestService {
       throw new BadRequestException('User has no payments')
     }
 
+    const payment = user.payments.find(payment => payment.isSelected)!
+
     const result = await this.paymentUtils.sendTransaction({
       transactionSum: guest.ticket.price,
-      cardCVV: user.payments[0].paymentCVV!,
-      token: user.payments[0].paymentToken!
+      cardCVV: payment.paymentCVV!,
+      token: payment.paymentToken!
     })
 
     if (result.HasError) {
