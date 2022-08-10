@@ -22,7 +22,7 @@ import { ToDate } from '../../decorators/ToDate'
 import { ToNumber } from '../../decorators/ToNumber'
 import { Location, StringLocation } from '../../types/location.types'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
-import { Permissions, RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
+import { /*Permissions, */ RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
@@ -37,17 +37,17 @@ export class EditorDto {
   @IsNotEmpty()
   readonly userId?: number
 
-  @ApiProperty({
-    description: 'Editor permissions',
-    example: [Permissions.CreateReferralLinks, Permissions.EditAccess],
-    enum: Permissions,
-    isArray: true,
-    required: true
-  })
-  @IsEnum(Permissions, { each: true })
-  @IsArray()
-  @ArrayNotEmpty()
-  readonly permissions: Permissions[]
+  // @ApiProperty({
+  //   description: 'Editor permissions',
+  //   example: [Permissions.CreateReferralLinks, Permissions.EditAccess],
+  //   enum: Permissions,
+  //   isArray: true,
+  //   required: true
+  // })
+  // @IsEnum(Permissions, { each: true })
+  // @IsArray()
+  // @ArrayNotEmpty()
+  // readonly permissions: Permissions[]
 }
 
 export class CreateEventDto {
