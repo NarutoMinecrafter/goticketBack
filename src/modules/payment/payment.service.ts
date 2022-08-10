@@ -53,10 +53,10 @@ export class PaymentService {
     return this.paymentRepository.update(payment.id, payment)
   }
 
-  select(payment: Payment): Promise<UpdateResult> | void {
-    if (!payment.isSelected) {
-      return this.update({ ...payment, isSelected: true })
-    }
+  async select(paymentId: number, user: User): Promise<UpdateResult[]> {
+    const payments = user.payments.map(payment => ({ ...payment, isSelected: payment.id === paymentId }))
+
+    return await Promise.all(payments.map(async payment => await this.update(payment)))
   }
 
   unselect(payment: Payment): Promise<UpdateResult> | void {

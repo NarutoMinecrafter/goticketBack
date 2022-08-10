@@ -18,7 +18,7 @@ import { User } from './user.entity'
 import { ChangeUserDto, GetUserDto } from './user.dto'
 import { JwtAuthGuard } from '../auth/auth.guard'
 import { fileInterceptor } from './user.interceptor'
-import { CreatePaymentDto, RemovePaymentDto } from '../payment/payment.dto'
+import { CreatePaymentDto, RemovePaymentDto, SelectPaymentDto } from '../payment/payment.dto'
 
 @ApiTags('User')
 @Controller('user')
@@ -82,6 +82,13 @@ export class UserController {
   @Get('payments/selected')
   getSelectedPayment(@Req() { user }: Record<'user', User>) {
     return this.userService.getSelectedPayment(user.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('select-card')
+  selectPayment(@Body() dto: SelectPaymentDto, @Req() { user }: Record<'user', User>) {
+    return this.userService.selectPayment(dto, user)
   }
 
   @UseGuards(JwtAuthGuard)
