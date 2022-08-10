@@ -6,13 +6,14 @@ import { scheduleJob } from 'node-schedule'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
-import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
+import { defaultRequiredAdditionalInfo, Event, Permissions, TypeEnum } from './event.entity'
 import { UserService } from '../user/user.service'
 import { sortMap } from '../../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
 import { NotificationService } from '../notification/notification.service'
 import { SexEnum } from '../user/user.dto'
+import { isEmptyObject } from '../../utils/other.utils'
 
 @Injectable()
 export class EventService {
@@ -34,13 +35,13 @@ export class EventService {
 
     event.editors = await Promise.all(
       editors?.map(async editor => {
-        const user = await this.userService.getBy('id', editor)
+        const user = await this.userService.getBy('id', editor.userId)
 
         if (!user) {
-          throw new BadRequestException(`User with id ${editor} is not defined!`)
+          throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
         }
 
-        return user
+        return { user, permissions: editor.permissions }
       }) || []
     )
     event.guests = []
@@ -276,19 +277,38 @@ export class EventService {
   async update({ id, editors, ...dto }: ChangeEventDto, user: User) {
     const event = await this.getById(id)
 
-    if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
+    const isOwner = event.creator.id === user.id
+    const isEditor = event.editors.some(editor => {
+      const isThisUser = editor.user.id === user.id
+
+      if (!isThisUser) {
+        return false
+      }
+
+      if (!isEmptyObject(dto) && !editor.permissions.includes(Permissions.EditEvent)) {
+        return false
+      }
+
+      if (editors && !editor.permissions.includes(Permissions.EditAccess)) {
+        return false
+      }
+
+      return true
+    })
+
+    if (!isOwner && !isEditor) {
       throw new BadRequestException('You do not have permission to edit this event')
     }
 
     const users = await Promise.all(
       editors?.map(async editor => {
-        const user = await this.userService.getBy('id', editor)
+        const user = await this.userService.getBy('id', editor.userId)
 
         if (!user) {
-          throw new BadRequestException(`User with id ${editor} is not defined!`)
+          throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
         }
 
-        return user
+        return { user, permissions: editor.permissions }
       }) || event.editors
     )
 
@@ -322,8 +342,12 @@ export class EventService {
     }
 
     const guest = event.guests.find(guest => guest.id === guestId)!
+    const isCreator = user.id === event.creator.id
+    const isEditor = event.editors.some(
+      editor => editor.user.id === user.id && editor.permissions.includes(Permissions.QRScanner)
+    )
 
-    if (event.creator.id !== user.id && !event.editors.some(editor => editor.id === user.id)) {
+    if (!isCreator && !isEditor) {
       throw new BadRequestException('You do not have permission to use this ticket')
     }
 

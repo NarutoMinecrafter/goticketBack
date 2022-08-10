@@ -6,6 +6,7 @@ import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
 import { PaymentUtils } from '../../utils/payment.utils'
 import { NotificationService } from '../notification/notification.service'
+import { Permissions } from '../event/event.entity'
 
 @Injectable()
 export class GuestService {
@@ -51,8 +52,13 @@ export class GuestService {
       throw new BadRequestException('Guest not found')
     }
 
-    if (guest.event.creator.id !== user.id && !guest.event.editors.some(editor => editor.id === user.id)) {
-      throw new ForbiddenException('You are not the owner of this event')
+    const isCreator = user.id === guest.event.creator.id
+    const isEditor = guest.event.editors.some(
+      editor => editor.user.id === user.id && editor.permissions.includes(Permissions.GuestConfirmation)
+    )
+
+    if (!isCreator && !isEditor) {
+      throw new ForbiddenException('You do not have permission to edit the guests of this event')
     }
 
     if (dto.status === GuestStatus.Accepted && guest.paymentStatus !== PaymentStatus.BOOKED) {

@@ -22,13 +22,32 @@ import { ToDate } from '../../decorators/ToDate'
 import { ToNumber } from '../../decorators/ToNumber'
 import { Location, StringLocation } from '../../types/location.types'
 import { BuyTicketDto, CreateTicketDto } from '../ticket/ticket.dto'
-import { RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
+import { Permissions, RequiredAdditionalInfoDto, TypeEnum } from './event.entity'
 
 export enum SortTypes {
   ByDate = 'date',
   ByTicketsCount = 'tickets',
   ByGeolocation = 'geo',
   ByCreateDate = 'createDate'
+}
+
+export class EditorDto {
+  @ApiProperty({ example: 123, description: 'User id', required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly userId?: number
+
+  @ApiProperty({
+    description: 'Editor permissions',
+    example: [Permissions.CreateReferralLinks, Permissions.EditAccess],
+    enum: Permissions,
+    isArray: true,
+    required: true
+  })
+  @IsEnum(Permissions, { each: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  readonly permissions: Permissions[]
 }
 
 export class CreateEventDto {
@@ -130,11 +149,10 @@ export class CreateEventDto {
   @IsOptional()
   readonly coupons?: string[]
 
-  @ApiProperty({ description: 'Array of editors user id', example: [123, 32], required: false })
+  @ApiProperty({ description: 'Event editors (managers)', example: [EditorDto], required: false })
   @IsArray()
-  @IsNumber({}, { each: true })
   @IsOptional()
-  readonly editors?: number[]
+  readonly editors?: EditorDto[]
 }
 
 export class GetEventDto {
