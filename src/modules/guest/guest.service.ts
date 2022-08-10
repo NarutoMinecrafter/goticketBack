@@ -5,7 +5,7 @@ import { Repository } from 'typeorm'
 import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
 import { PaymentUtils } from '../../utils/payment.utils'
-import { NotificationService } from './../notification/notification.service'
+import { NotificationService } from '../notification/notification.service'
 
 @Injectable()
 export class GuestService {
@@ -82,10 +82,12 @@ export class GuestService {
       throw new BadRequestException('User has no payments')
     }
 
+    const payment = user.payments.find(payment => payment.isSelected)!
+
     const result = await this.paymentUtils.sendTransaction({
       transactionSum: guest.ticket.price,
-      cardCVV: user.payments[0].paymentCVV!,
-      token: user.payments[0].paymentToken!
+      cardCVV: payment.paymentCVV!,
+      token: payment.paymentToken!
     })
 
     if (result.HasError) {

@@ -62,7 +62,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiResponse({ type: Boolean, description: 'Add payment card' })
+  @ApiResponse({ type: Boolean, description: 'Remove payment card' })
   @Delete('/payments')
   removeCard(@Query() { id }: RemovePaymentDto, @Req() { user }: Record<'user', User>) {
     return this.userService.removePayment(id, user)

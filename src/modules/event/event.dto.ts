@@ -265,7 +265,7 @@ export class UseTicketDto {
   readonly guestId: number
 
   @ApiProperty({
-    example: 1,
+    example: false,
     description: 'If true and the ticket is booked, then the money will be deducted from the card'
   })
   @IsBoolean()
