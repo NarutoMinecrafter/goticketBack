@@ -17,6 +17,7 @@ import { PaymentModule } from './modules/payment/payment.module'
 import { Payment } from './modules/payment/payment.entity'
 import { BankModule } from './modules/bank/bank.module'
 import { BankAccount } from './modules/bank/bank.entity'
+import { SmsModule } from './modules/sms/sms.module'
 
 dotenv.config()
 
@@ -38,7 +39,8 @@ const { PG_URL } = process.env
     GuestModule,
     NotificationModule,
     PaymentModule,
-    BankModule
+    BankModule,
+    SmsModule
   ]
 })
 export class AppModule {}
