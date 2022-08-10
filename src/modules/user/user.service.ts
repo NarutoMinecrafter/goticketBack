@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from './user.entity'
 import { PaymentService } from '../payment/payment.service'
-import { CreatePaymentDto } from '../payment/payment.dto'
+import { CreatePaymentDto, SelectPaymentDto } from '../payment/payment.dto'
 
 @Injectable()
 export class UserService {
@@ -99,6 +99,10 @@ export class UserService {
     await this.userRepository.save(user)
 
     return Boolean(true)
+  }
+
+  async selectPayment({ id }: SelectPaymentDto, user: User) {
+    return await this.paymentService.select(id, user)
   }
 
   getPayments(id: User['id']) {
