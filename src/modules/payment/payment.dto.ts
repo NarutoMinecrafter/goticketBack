@@ -37,3 +37,10 @@ export class RemovePaymentDto {
   @IsNotEmpty()
   readonly id: number
 }
+
+export class SelectPaymentDto {
+  @ApiProperty({ example: 123, description: 'Payment id', required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  readonly id: number
+}
