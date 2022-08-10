@@ -35,26 +35,26 @@ export enum TypeEnum {
   Exhibition = 'Exhibition'
 }
 
-export enum Permissions {
-  QRScanner = 0,
-  GuestConfirmation = 1,
-  CreateReferralLinks = 2,
-  EditEvent = 3,
-  EditAccess = 4
-}
+// export enum Permissions {
+//   QRScanner = 0,
+//   GuestConfirmation = 1,
+//   CreateReferralLinks = 2,
+//   EditEvent = 3,
+//   EditAccess = 4
+// }
 
-export class Editor {
-  @ApiProperty({ description: 'User of this editor', example: () => User })
-  user: User
+// export class Editor {
+//   @ApiProperty({ description: 'User of this editor', example: () => User })
+//   user: User
 
-  @ApiProperty({
-    description: 'Editor permissions',
-    example: [Permissions.CreateReferralLinks, Permissions.EditAccess],
-    enum: Permissions,
-    isArray: true
-  })
-  permissions: Permissions[]
-}
+//   @ApiProperty({
+//     description: 'Editor permissions',
+//     example: [Permissions.CreateReferralLinks, Permissions.EditAccess],
+//     enum: Permissions,
+//     isArray: true
+//   })
+//   permissions: Permissions[]
+// }
 
 export class RequiredAdditionalInfoDto {
   @ApiProperty({ description: 'Does a person have to indicate age to buy this ticket', example: true, default: false })
@@ -184,9 +184,9 @@ export class Event {
   @ManyToOne(() => User, user => user.events)
   creator: User
 
-  @ApiProperty({ description: 'Editors (managers) of this event', example: () => [Editor], type: () => [Editor] })
-  @Column('json', { default: [] })
-  editors: Editor[]
+  // @ApiProperty({ description: 'Editors (managers) of this event', example: () => [Editor], type: () => [Editor] })
+  // @Column('json', { default: [] })
+  // editors: Editor[]
 
   @ApiProperty({ description: "Guest's of this event", example: () => [Guest], type: () => [Guest] })
   @OneToMany(() => Guest, guest => guest.event)

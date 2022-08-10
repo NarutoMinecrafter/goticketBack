@@ -6,7 +6,7 @@ import { ChangeGuestStatusDto, CreateGuestDto } from './guest.dto'
 import { User } from '../user/user.entity'
 import { PaymentUtils } from '../../utils/payment.utils'
 import { NotificationService } from '../notification/notification.service'
-import { Permissions } from '../event/event.entity'
+// import { Permissions } from '../event/event.entity'
 
 @Injectable()
 export class GuestService {
@@ -53,11 +53,11 @@ export class GuestService {
     }
 
     const isCreator = user.id === guest.event.creator.id
-    const isEditor = guest.event.editors.some(
-      editor => editor.user.id === user.id && editor.permissions.includes(Permissions.GuestConfirmation)
-    )
+    // const isEditor = guest.event.editors.some(
+    //   editor => editor.user.id === user.id && editor.permissions.includes(Permissions.GuestConfirmation)
+    // )
 
-    if (!isCreator && !isEditor) {
+    if (!isCreator /* && !isEditor*/) {
       throw new ForbiddenException('You do not have permission to edit the guests of this event')
     }
 

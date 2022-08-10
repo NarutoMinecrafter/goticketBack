@@ -34,7 +34,7 @@ export class BankAccount {
   @Column({ nullable: true })
   idCode?: string
 
-  @ApiProperty({ type: () => [User], description: 'Author', example: User })
+  @ApiProperty({ type: () => [User], description: 'Author', example: () => User })
   @ManyToOne(() => User, user => user.payments)
   user: User
 }
