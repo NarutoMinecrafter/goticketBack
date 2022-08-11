@@ -84,6 +84,13 @@ export class CreateEventDto {
   @IsOptional()
   readonly files?: Express.Multer.File[]
 
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMaxSize(3)
+  @ArrayMinSize(0)
+  @IsOptional()
+  readonly demoLinks?: string[]
+
   @ApiProperty({ example: [TypeEnum.Festival], isArray: true, description: 'Event type array', enum: TypeEnum })
   @IsArray()
   @ArrayNotEmpty()
@@ -96,11 +103,6 @@ export class CreateEventDto {
   @ArrayNotEmpty()
   @ArrayMinSize(1)
   readonly bank: string[]
-
-  @IsArray()
-  @IsString({ each: true })
-  @ArrayMaxSize(3)
-  readonly demoLinks: string[]
 
   @ApiProperty({ description: 'Is private event', example: false, required: false })
   @ToBolean()
