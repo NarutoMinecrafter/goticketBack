@@ -26,10 +26,7 @@ export class EventService {
     private readonly guestService: GuestService,
     private readonly notificationService: NotificationService,
     private readonly editorService: EditorService
-  ) {
-    console.log('drop')
-    this.eventRepository.clear()
-  }
+  ) {}
 
   async create({ tickets: ticketsDto, requiredAdditionalInfo, editors, ...dto }: CreateEventDto, user: User) {
     console.log(dto)

@@ -18,6 +18,7 @@ import { Payment } from './modules/payment/payment.entity'
 import { BankModule } from './modules/bank/bank.module'
 import { BankAccount } from './modules/bank/bank.entity'
 import { EditorModule } from './modules/editor/editor.module'
+import { Editor } from './modules/editor/editor.entity'
 
 dotenv.config()
 
@@ -28,7 +29,7 @@ const { PG_URL } = process.env
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: PG_URL,
-      entities: [User, Ticket, Event, Guest, Payment, BankAccount],
+      entities: [User, Ticket, Event, Guest, Payment, BankAccount, Editor],
       synchronize: true
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'static'), serveRoot: '/static' }),

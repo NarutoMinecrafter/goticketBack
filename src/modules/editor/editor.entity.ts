@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { User } from '../user/user.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Event } from '../event/event.entity'
+import { User } from '../user/user.entity'
 
 export enum Permissions {
   QRScanner = 0,
@@ -17,11 +17,11 @@ export class Editor {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ApiProperty({ description: 'User of this editor', example: () => User })
+  @ApiProperty({ description: 'User of this editor', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.editors)
   user: User
 
-  @ApiProperty({ description: 'Event of this editor', example: () => Event })
+  @ApiProperty({ description: 'Event of this editor', example: () => Event, type: () => Event })
   @ManyToOne(() => Event, event => event.editors)
   event: Event
 
