@@ -64,7 +64,7 @@ export class EventService {
               title: "Notification of tomorrow's event",
               body: `Starting ${event.name} tomorrow at ${date.getHours()}:${date.getMinutes()}. Don't be late!`
             },
-            data: { eventId: event.id.toString() }
+            data: { screen: 'EventInfo', eventId: event.id.toString() }
           })) || []
 
       this.notificationService.sendPushNotifications(messages)
