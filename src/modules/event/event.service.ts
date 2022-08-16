@@ -6,24 +6,30 @@ import { scheduleJob } from 'node-schedule'
 import { TicketService } from '../ticket/ticket.service'
 import { User } from '../user/user.entity'
 import { BuyTicketsDto, ChangeEventDto, CreateEventDto, GetEventDto, SortTypes, UseTicketDto } from './event.dto'
-import { defaultRequiredAdditionalInfo, Event, /*Permissions, */ TypeEnum } from './event.entity'
-// import { UserService } from '../user/user.service'
+import { defaultRequiredAdditionalInfo, Event, TypeEnum } from './event.entity'
+import { UserService } from '../user/user.service'
 import { sortMap } from '../../utils/map.utils'
 import { GuestService } from '../guest/guest.service'
 import { PaymentStatus } from '../guest/guest.entity'
 import { NotificationService } from '../notification/notification.service'
 import { SexEnum } from '../user/user.dto'
-// import { isEmptyObject } from '../../utils/other.utils'
+import { isEmptyObject } from '../../utils/other.utils'
+import { Editor, Permissions } from '../editor/editor.entity'
+import { EditorService } from '../editor/editor.service'
 
 @Injectable()
 export class EventService {
   constructor(
     @InjectRepository(Event) private readonly eventRepository: Repository<Event>,
     private readonly ticketService: TicketService,
-    // private readonly userService: UserService,
+    private readonly userService: UserService,
     private readonly guestService: GuestService,
-    private readonly notificationService: NotificationService
-  ) {}
+    private readonly notificationService: NotificationService,
+    private readonly editorService: EditorService
+  ) {
+    console.log('drop')
+    this.eventRepository.clear()
+  }
 
   async create({ tickets: ticketsDto, requiredAdditionalInfo, editors, ...dto }: CreateEventDto, user: User) {
     console.log(dto)
@@ -34,17 +40,24 @@ export class EventService {
     event.tickets = tickets
     event.requiredAdditionalInfo = { ...defaultRequiredAdditionalInfo, ...requiredAdditionalInfo }
 
-    // event.editors = await Promise.all(
-    //   editors?.map(async editor => {
-    //     const user = await this.userService.getBy('id', editor.userId)
+    event.editors = await Promise.all(
+      editors?.map(async editor => {
+        const potentialUser = await this.userService.getBy('id', editor.userId)
 
-    //     if (!user) {
-    //       throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
-    //     }
+        if (!potentialUser) {
+          throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
+        }
 
-    //     return { user, permissions: editor.permissions }
-    //   }) || []
-    // )
+        return this.editorService.create(
+          {
+            userId: potentialUser.id,
+            permissions: editor.permissions,
+            event
+          },
+          user
+        )
+      }) || []
+    )
     event.guests = []
 
     event = await this.eventRepository.save(event)
@@ -279,41 +292,48 @@ export class EventService {
     const event = await this.getById(id)
 
     const isOwner = event.creator.id === user.id
-    // const isEditor = event.editors.some(editor => {
-    //   const isThisUser = editor.user.id === user.id
+    const isEditor = event.editors.some(editor => {
+      const isThisUser = editor.user.id === user.id
 
-    //   if (!isThisUser) {
-    //     return false
-    //   }
+      if (!isThisUser) {
+        return false
+      }
 
-    //   if (!isEmptyObject(dto) && !editor.permissions.includes(Permissions.EditEvent)) {
-    //     return false
-    //   }
+      if (!isEmptyObject(dto) && !editor.permissions.includes(Permissions.EditEvent)) {
+        return false
+      }
 
-    //   if (editors && !editor.permissions.includes(Permissions.EditAccess)) {
-    //     return false
-    //   }
+      if (editors && !editor.permissions.includes(Permissions.EditAccess)) {
+        return false
+      }
 
-    //   return true
-    // })
+      return true
+    })
 
-    if (!isOwner /* && !isEditor*/) {
+    if (!isOwner && !isEditor) {
       throw new BadRequestException('You do not have permission to edit this event')
     }
 
-    // const users = await Promise.all(
-    //   editors?.map(async editor => {
-    //     const user = await this.userService.getBy('id', editor.userId)
+    const users: Editor[] = await Promise.all(
+      editors?.map(async editor => {
+        const potentialUser = await this.userService.getBy('id', editor.userId)
 
-    //     if (!user) {
-    //       throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
-    //     }
+        if (!potentialUser) {
+          throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
+        }
 
-    //     return { user, permissions: editor.permissions }
-    //   }) || event.editors
-    // )
+        return this.editorService.create(
+          {
+            userId: potentialUser.id,
+            permissions: editor.permissions,
+            event
+          },
+          user
+        )
+      }) || event.editors
+    )
 
-    const result = await this.eventRepository.update(id, { ...dto /*, editors: users*/ })
+    const result = await this.eventRepository.update(id, { ...dto, editors: users })
 
     return Boolean(result.affected)
   }
@@ -344,11 +364,11 @@ export class EventService {
 
     const guest = event.guests.find(guest => guest.id === guestId)!
     const isCreator = user.id === event.creator.id
-    // const isEditor = event.editors.some(
-    //   editor => editor.user.id === user.id && editor.permissions.includes(Permissions.QRScanner)
-    // )
+    const isEditor = event.editors.some(
+      editor => editor.user.id === user.id && editor.permissions.includes(Permissions.QRScanner)
+    )
 
-    if (!isCreator /* && !isEditor*/) {
+    if (!isCreator && !isEditor) {
       throw new BadRequestException('You do not have permission to use this ticket')
     }
 
