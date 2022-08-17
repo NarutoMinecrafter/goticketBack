@@ -1,39 +1,12 @@
 {
-  "project_info": {
-    "project_number": "655511885016",
-    "project_id": "selector-6484b",
-    "storage_bucket": "selector-6484b.appspot.com"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:655511885016:android:2097664a37cdbb20caf3ad",
-        "android_client_info": {
-          "package_name": "com.x_p1gas_x.goTicket"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "655511885016-r3ktatbv3jq8dr9hurdcjvsl5jobpd0t.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD4R7lsgwWitYtEBaYOVM-z9lpYtvz8_8M"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "655511885016-r3ktatbv3jq8dr9hurdcjvsl5jobpd0t.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+  "type": "service_account",
+  "project_id": "selector-6484b",
+  "private_key_id": "a78067a7a74f2e2e60654eba2dcd0f413968eed1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLG6/Q4KiEmkwk\nmnPNB2zMSruF0bR5RrM4TFriRmA3X1q25PfTSnDKZh9bjCiK4RUDtRoLX2LmXOvS\n0vj8PXIwWQcXwWtQpZzfQUwfijSV03fmQrPVPGlXQxYx9QDeJhq+2iNGC5pZyEER\nB7PQRPe0Qy+gdk2sOJLUPLTiIT5sy0DavlC4ExdO+F3sO6CMElJVEmwRUVEX+Af+\n5VoP6EPst5UbrMHE2MBl8RRv7UEk6BOzxEG2Tg2Ha1+9Hm5mqsiQnrsQqQj7Y9ox\n7dwhvfluL05f26Jdm2HR51dvgJriIkH0dq3O/rZiZ4H1czXINBMab/MBWNdbAZuZ\niTgb0q/nAgMBAAECggEACX+0/EbVesYgk4GpssgLHY7NMFf7YcSdsx9XDMgPzecm\nvfD9aiNMHRsjkkt+xef67J52pluCq5Vi7gwx2tIg2gP/4euI0k+8g3BxV/RFu1AV\nhm5OLMXTg2I+0n1L2hfcHlrjVW5LfLFx4ZMDpNTk5MhTnOSLg2dt7oEcUIsPeVT+\n0DMIlxnAhlcWhaUZf0CPB/6ZLREm1LK6J2GQ5xpwf3bxYMCVWoN1Kytf/ZaC9ZY7\nUuM18jbsEuYMKnot25hXcEg+EHgGGoKixNwsnQ7YkuWuSh1B52DZ+O3UJX7t8SHQ\nGl7avpn6CxOoPkdzFRAvMJTFMdqIPkDEgmI/eKtjgQKBgQDqgC76h8MV6Nt0Clip\nReloq/0dXhgfZSElFnyozArD2AMCuwiJBTsIvZYe3jOkBDi8UV+LR7CpKzJ0D14C\nMRiINAr98+/r3Xld/uWjy7QxZrLOzFq+OdB/xNEAxe1NRjgs6cK93wR6pMy+URwR\nxleA+h8INvs4E2q0BKFRWivpQQKBgQDdurVbheVLJH7l+qQk7p9TWu+fvvkOdtKj\nln7i0n67+bC+K1tL82qgouGAo6QE2xgBAsw2WtSpHXxm/9Oa6vfQOIWCwNb3p1WK\nBdm9yZi4mUwfX8G0OkfjfUaxQiqx6nJ06WFoAZ/Okh0eL9m90KTW4sMyPBBwMLP9\nnogHQQlnJwKBgGzTW/nsMz7ht6ZcftTfmvh2iJquZid7uSwLCYMUXhKRFqSXw9hC\n0yi1QwvENtbxFptecCak+HkpkNqHnysJOcdLz6YXJMqjF4XlmxCuoksiy+xordwF\n3JrO7eeb8wqfgcZmHXgcHWoFPPc9kPc2wrkaWnhne6KEcEpms66bWDGBAoGBAIPY\nlCLaGaB3ESY7xgNYCVGNj1OUQZDCQzqXMNg7hrTMIrbSHTWqhssCT8kohU2F4l4n\nhbsEg9QT/ndYxEEoWzdrhKhddvZIgGrUU8ew6qlKLqOxUwOSbFDvm2uoBq9I08qF\nRDCOVrKE29+pYHaobHyC1sM2SCgOLdkvvX9iwu6dAoGAOYIJ1l/pjCHIgrJ6TdLr\nd6eBtHvjKFP+MSDn870kxWUqwth1cUyL3/53jZHIsEQfto2ebYijBhBv7c1oX7E8\nP3GrE4iP4lKtJUG8L0Jg2p1oJL3qzR4yXLfyp0iM3xkHgrQNQxFF+z34/qYXjpPz\nuOIkUxfEQF6fNN2iv3anmPc=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-l4sm2@selector-6484b.iam.gserviceaccount.com",
+  "client_id": "108156173962157954304",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-l4sm2%40selector-6484b.iam.gserviceaccount.com"
 }
