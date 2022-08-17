@@ -52,10 +52,10 @@ export class AuthService {
           this.notificationService.sendPushNotification({
             token: dto.pushNotificationToken,
             notification: {
-              title: 'Change payment status',
-              body: `Ticket status for {NAME} has been changed too {STATUS}`
+              title: "Notification of tomorrow's event",
+              body: `Starting {event.name} tomorrow at ${new Date().getHours()}:${new Date().getMinutes()}. Don't be late!`
             },
-            data: { screen: 'Tickets' }
+            data: { screen: 'EventInfo', eventId: '1' }
           })
 
           this.userService.update({ id: user.id, pushNotificationToken: dto.pushNotificationToken })
