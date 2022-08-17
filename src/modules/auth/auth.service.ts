@@ -22,7 +22,7 @@ interface IPhone {
 
 @Injectable()
 export class AuthService {
-  private readonly totp = new TOTP({ step: 3600, createDigest, digits: 4 })
+  private readonly totp = new TOTP({ step: 300, createDigest, digits: 4 })
   private readonly redis: RedisClientType
   // @ts-expect-error
   private readonly twillo: Twilio
