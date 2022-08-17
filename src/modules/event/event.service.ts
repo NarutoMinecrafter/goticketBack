@@ -26,7 +26,6 @@ export class EventService {
   ) {}
 
   async create({ tickets: ticketsDto, requiredAdditionalInfo, editors, ...dto }: CreateEventDto, user: User) {
-    console.log(dto)
     let event = await this.eventRepository.create(dto)
     const tickets = await Promise.all(ticketsDto.map(ticket => this.ticketService.create(ticket)))
 
