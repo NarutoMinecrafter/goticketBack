@@ -8,7 +8,6 @@ import { createClient, RedisClientType } from 'redis'
 import { CodeDto, LoginDto, PhoneDto } from './auth.dto'
 import { CreateUserDto } from '../user/user.dto'
 import { Twilio } from 'twilio'
-import { NotificationService } from '../notification/notification.service'
 
 dotenv.config()
 
@@ -27,11 +26,7 @@ export class AuthService {
   // @ts-expect-error
   private readonly twillo: Twilio
 
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly userService: UserService,
-    private readonly notificationService: NotificationService
-  ) {
+  constructor(private readonly jwtService: JwtService, private readonly userService: UserService) {
     this.redis = createClient({ url: REDIS_URL })
     this.redis.connect()
     this.twillo = new Twilio(TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN)
@@ -46,18 +41,7 @@ export class AuthService {
       if (user) {
         const token = await this.jwtService.signAsync({ id: user.id })
 
-        console.log(dto)
-
         if (dto.pushNotificationToken) {
-          this.notificationService.sendPushNotification({
-            token: dto.pushNotificationToken,
-            notification: {
-              title: "Notification of tomorrow's event",
-              body: `Starting {event.name} tomorrow at ${new Date().getHours()}:${new Date().getMinutes()}. Don't be late!`
-            },
-            data: { screen: 'EventInfo', eventId: '1' }
-          })
-
           this.userService.update({ id: user.id, pushNotificationToken: dto.pushNotificationToken })
         }
 
