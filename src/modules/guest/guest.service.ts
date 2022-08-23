@@ -37,6 +37,16 @@ export class GuestService {
       .getMany()
   }
 
+  getByAuthor(id: number) {
+    return this.guestRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.event', 'event')
+      .leftJoinAndSelect('ticket.ticket', 'ticket')
+      .leftJoinAndSelect('guest.user', 'user')
+      .where('user.id = :id', { id })
+      .getMany()
+  }
+
   async changeGuestStatus(dto: ChangeGuestStatusDto, user: User) {
     const guest = await this.guestRepository
       .createQueryBuilder('guest')
