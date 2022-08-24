@@ -8,6 +8,7 @@ import { Guest } from '../guest/guest.entity'
 import { Event } from '../event/event.entity'
 import { Location } from '../../types/location.types'
 import { Payment } from '../payment/payment.entity'
+import { Editor } from '../editor/editor.entity'
 
 @Entity()
 export class User {
@@ -82,6 +83,10 @@ export class User {
   @ApiProperty({ description: 'User guests', example: () => [Guest], type: () => [Guest], default: [] })
   @OneToMany(() => Guest, guest => guest.event)
   guests?: Guest[]
+
+  @ApiProperty({ description: 'User as editor', example: () => [Editor], type: () => [Editor], default: [] })
+  @OneToMany(() => Editor, editor => editor.user)
+  editors?: Editor[]
 
   @BeforeInsert()
   @BeforeUpdate()
