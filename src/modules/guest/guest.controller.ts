@@ -31,6 +31,13 @@ export class GuestController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: Guest, isArray: true, description: 'Get user guests' })
+  @Get('/my')
+  getMyTickets(@Req() { user }: Record<'user', User>) {
+    return this.guestService.getByAuthor(user.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiResponse({ type: Boolean, description: 'Accept guest' })
   @Put('status')
