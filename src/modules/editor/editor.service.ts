@@ -32,7 +32,7 @@ export class EditorService {
       throw new BadRequestException('Event not found')
     }
 
-    const isOwner = event.creator.id !== author.id
+    const isOwner = event.creator.id === author.id
     const isEditor = event.editors.some(
       editor => editor.user.id === author.id && editor.permissions.includes(Permissions.EditAccess)
     )
