@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import { UserService } from '../user/user.service'
-import { TOTP } from '@otplib/core'
+import { HOTP } from '@otplib/core'
 import { createDigest } from '@otplib/plugin-crypto'
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
@@ -11,8 +11,7 @@ import { Twilio } from 'twilio'
 
 dotenv.config()
 
-// @ts-expect-error
-const { REDIS_URL, TOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
+const { REDIS_URL, HOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
 
 interface IPhone {
   code: number
@@ -21,9 +20,8 @@ interface IPhone {
 
 @Injectable()
 export class AuthService {
-  private readonly totp = new TOTP({ step: 300, createDigest, digits: 4 })
+  private readonly hotp = new HOTP({ step: 300, createDigest, digits: 4 })
   private readonly redis: RedisClientType
-  // @ts-expect-error
   private readonly twillo: Twilio
 
   constructor(private readonly jwtService: JwtService, private readonly userService: UserService) {
@@ -76,15 +74,15 @@ export class AuthService {
   }
 
   async sendCode({ phone }: PhoneDto) {
-    const code = Number(this.totp.generate(TOTP_SECRET))
+    const code = Number(this.hotp.generate(HOTP_SECRET, 4))
 
     await this.redis.set(phone, JSON.stringify({ code, confirmed: false }))
 
-    // await this.twillo.messages.create({
-    //   body: `Your GoTicket verefication code: ${code}`,
-    //   from: TWILLO_PHONE,
-    //   to: phone
-    // })
+    await this.twillo.messages.create({
+      body: `Your GoTicket verefication code: ${code}`,
+      from: TWILLO_PHONE,
+      to: phone
+    })
 
     return { code }
   }
@@ -93,7 +91,7 @@ export class AuthService {
     const candidatePromise = await this.redis.get(phone)
     const candidate: IPhone | null = candidatePromise && JSON.parse(candidatePromise)
 
-    if (candidate?.code === code && this.totp.check(code.toString(), TOTP_SECRET)) {
+    if (candidate?.code === code && this.hotp.check(code.toString(), HOTP_SECRET, 4)) {
       this.redis.set(phone, JSON.stringify({ code, confirmed: true }))
 
       return true
