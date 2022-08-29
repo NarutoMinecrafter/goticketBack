@@ -78,11 +78,15 @@ export class AuthService {
 
     await this.redis.set(phone, JSON.stringify({ code, confirmed: false }))
 
-    await this.twillo.messages.create({
-      body: `Your GoTicket verefication code: ${code}`,
-      from: TWILLO_PHONE,
-      to: phone
-    })
+    try {
+      await this.twillo.messages.create({
+        body: `Your GoTicket verefication code: ${code}`,
+        from: TWILLO_PHONE,
+        to: phone
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
     return { code }
   }
