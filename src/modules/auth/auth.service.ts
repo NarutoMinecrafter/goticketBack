@@ -1,7 +1,5 @@
 import dotenv from 'dotenv'
 import { UserService } from '../user/user.service'
-import { HOTP } from '@otplib/core'
-import { createDigest } from '@otplib/plugin-crypto'
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { createClient, RedisClientType } from 'redis'
@@ -11,7 +9,7 @@ import { Twilio } from 'twilio'
 
 dotenv.config()
 
-const { REDIS_URL, HOTP_SECRET, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
+const { REDIS_URL, TWILLO_ACCOUNT_SID, TWILLO_AUTH_TOKEN, TWILLO_PHONE } = process.env
 
 interface IPhone {
   code: number
@@ -20,7 +18,6 @@ interface IPhone {
 
 @Injectable()
 export class AuthService {
-  private readonly hotp = new HOTP({ step: 300, createDigest, digits: 4 })
   private readonly redis: RedisClientType
   private readonly twillo: Twilio
 
@@ -74,7 +71,7 @@ export class AuthService {
   }
 
   async sendCode({ phone }: PhoneDto) {
-    const code = Number(this.hotp.generate(HOTP_SECRET, 4))
+    const code = Math.floor(1000 + Math.random() * 9000)
 
     await this.redis.set(phone, JSON.stringify({ code, confirmed: false }))
 
@@ -95,7 +92,7 @@ export class AuthService {
     const candidatePromise = await this.redis.get(phone)
     const candidate: IPhone | null = candidatePromise && JSON.parse(candidatePromise)
 
-    if (candidate?.code === code && this.hotp.check(code.toString(), HOTP_SECRET, 4)) {
+    if (candidate?.code === code) {
       this.redis.set(phone, JSON.stringify({ code, confirmed: true }))
 
       return true
