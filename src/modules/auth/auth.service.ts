@@ -71,7 +71,7 @@ export class AuthService {
   }
 
   async sendCode({ phone }: PhoneDto) {
-    const code = Math.floor(1000 + Math.random() * 9000)
+    const code = 1111 //Math.floor(1000 + Math.random() * 9000)
 
     await this.redis.set(phone, JSON.stringify({ code, confirmed: false }))
 
