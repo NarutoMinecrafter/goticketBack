@@ -52,7 +52,7 @@ export class Ticket {
     example: TicketPriceTypes.Regular,
     enum: TicketPriceTypes
   })
-  @Column('string', { nullable: false, default: TicketPriceTypes.Regular })
+  @Column('text', { nullable: false, default: TicketPriceTypes.Regular })
   currentPriceType: TicketPriceTypes
 
   @ApiProperty({ description: 'Ticket service charge', example: 2 })
