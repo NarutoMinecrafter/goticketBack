@@ -101,7 +101,7 @@ export class GuestService {
     const payment = user.payments.find(payment => payment.isSelected)!
 
     const result = await this.paymentUtils.sendTransaction({
-      transactionSum: guest.ticket.price,
+      transactionSum: guest.ticket.currentPrice,
       cardCVV: payment.paymentCVV!,
       token: payment.paymentToken!
     })

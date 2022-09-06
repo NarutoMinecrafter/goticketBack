@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { GuestService } from '../guest/guest.service'
 import { BuyTicketDto, CreateTicketDto } from './ticket.dto'
-import { Ticket } from './ticket.entity'
+import { Ticket, TicketPriceTypes } from './ticket.entity'
 import { UserService } from '../user/user.service'
 import { PaymentStatus } from '../guest/guest.entity'
 
@@ -89,6 +89,30 @@ export class TicketService {
     }
 
     ticket.currentCount -= count
+
+    if (ticket.earlyBirdCount > 0) {
+      ticket.earlyBirdCount -= count
+
+      if (ticket.earlyBirdCount === 0) {
+        ticket.currentPrice = ticket.regularPrice
+        ticket.currentPriceType = TicketPriceTypes.Regular
+      }
+    } else if (ticket.regularCount > 0) {
+      ticket.regularCount -= count
+
+      if (ticket.regularCount === 0) {
+        ticket.currentPrice = ticket.lastChancePrice
+        ticket.currentPriceType = TicketPriceTypes.LastChance
+      }
+    } else if (ticket.lastChanceCount > 0) {
+      ticket.lastChanceCount -= count
+      ticket.currentPrice = ticket.lastChancePrice
+    }
+
+    if (ticket.earlyBirdCount < 0 || ticket.regularCount < 0 || ticket.lastChanceCount < 0) {
+      throw new BadRequestException('Not enough tickets')
+    }
+
     const paymentStatus = isBooking ? PaymentStatus.BOOKED : PaymentStatus.PENDING
 
     await this.update(ticket)
