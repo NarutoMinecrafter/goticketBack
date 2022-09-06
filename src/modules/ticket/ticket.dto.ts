@@ -1,4 +1,4 @@
-import { ToBolean } from './../../decorators/ToBolean'
+import { ToBolean } from '../../decorators/ToBolean'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator'
 import { Event } from '../event/event.entity'
@@ -20,28 +20,41 @@ export class CreateTicketDto {
   @ToNumber()
   @IsNumber()
   @IsNotEmpty()
-  readonly price: number
+  readonly regularPrice: number
 
-  @ApiProperty({ example: 250, description: 'Ticket pre-order price', required: false })
+  @ApiProperty({ example: 250, description: 'Early bird price', required: false })
   @ToNumber()
   @Min(1)
   @IsNumber()
   @IsOptional()
-  readonly preOrderPrice: number
+  readonly earlyBirdPrice: number
 
-  @ApiProperty({ example: 5000, description: 'Ticket last-chance price', required: false })
+  @ApiProperty({ example: 5000, description: 'Last chance price', required: false })
   @ToNumber()
   @Min(1)
   @IsNumber()
   @IsOptional()
   readonly lastChancePrice: number
 
-  @ApiProperty({ example: 500, description: 'Quantity of tickets' })
+  @ApiProperty({ example: 3500, description: 'Regular tickets count' })
+  @ToNumber()
+  @IsNumber()
+  @IsNotEmpty()
+  readonly regularCount: number
+
+  @ApiProperty({ example: 250, description: 'Early bird tickets count', required: false })
   @ToNumber()
   @Min(1)
   @IsNumber()
-  @IsNotEmpty()
-  readonly totalCount: number
+  @IsOptional()
+  readonly earlyBirdCount: number
+
+  @ApiProperty({ example: 5000, description: 'Last chance tickets count', required: false })
+  @ToNumber()
+  @Min(1)
+  @IsNumber()
+  @IsOptional()
+  readonly lastChanceCount: number
 
   @ApiProperty({ example: true, description: 'Can be booked', required: false })
   @ToBolean()
