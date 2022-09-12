@@ -97,7 +97,8 @@ export class EventService {
     dateType,
     eventType,
     placeNearInMeters,
-    onlyInStock
+    onlyInStock,
+    age
   }: Omit<GetEventDto, 'id'>): Promise<Event[]> {
     const pattern = query && `%${query.split(' ').join('%')}%`
 
@@ -124,7 +125,8 @@ export class EventService {
         dateTo: true,
         location: true,
         type: true,
-        inStock: true
+        inStock: true,
+        age: true
       }
 
       if (dateType && dateFrom) {
@@ -188,6 +190,13 @@ export class EventService {
 
       if (onlyInStock === 'true') {
         filtered.inStock = event.tickets?.some(ticket => ticket.currentCount !== 0)
+      }
+
+      if (age) {
+        const ages = age.split('-')
+        filtered.age =
+          Number(ages[0]) > event.requiredAdditionalInfo.minRequiredAge &&
+          event.requiredAdditionalInfo.minRequiredAge < Number(ages[1])
       }
 
       return Object.values(filtered).every(value => value)
