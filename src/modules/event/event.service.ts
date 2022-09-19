@@ -232,7 +232,7 @@ export class EventService {
       return 0
     })
 
-    return filteredEvents
+    return filteredEvents.filter(event => new Date(event.endDate) >= new Date())
   }
 
   getBy<T extends keyof Event>(
