@@ -222,6 +222,15 @@ export class GetEventDto {
   @IsBoolean()
   @IsOptional()
   readonly onlyInStock?: string
+
+  @ApiProperty({
+    example: '18-35',
+    description: `Filter by age`,
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  readonly age?: string
 }
 
 export class GetByEventIdDto {
@@ -235,6 +244,7 @@ export class GetByEventIdDto {
 export class BuyTicketsDto {
   @ApiProperty({ example: 1, description: 'Event id' })
   @IsNumber()
+  @IsArray()
   @IsNotEmpty()
   readonly id: number
 
