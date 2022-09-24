@@ -16,6 +16,7 @@ import { SexEnum } from '../user/user.dto'
 import { isEmptyObject } from '../../utils/other.utils'
 import { Editor, Permissions } from '../editor/editor.entity'
 import { EditorService } from '../editor/editor.service'
+import { TicketPriceTypes } from '../ticket/ticket.entity'
 
 @Injectable()
 export class EventService {
@@ -388,6 +389,85 @@ export class EventService {
     const result = await this.guestService.useTicket(guest.id)
 
     return Boolean(result.affected)
+  }
+
+  async statisticGuestsHeader(id: Event['id']) {
+    const event = await this.getById(id, ['guests.user'])
+    const totalGuests = event.guests.length
+    const totalWomen = event.guests.filter(item => item.user.sex === SexEnum.Women).length
+    const totalMen = event.guests.filter(item => item.user.sex === SexEnum.Women).length
+    const totalUnknow = totalGuests - totalWomen - totalMen
+
+    return {
+      totalGuests,
+      totalWomen,
+      totalMen,
+      totalUnknow
+    }
+  }
+
+  async statisticMoneyHeader(id: Event['id']) {
+    const event = await this.getById(id, ['tickets', 'guests'])
+    const totalCount = event.tickets.reduce((acc, value) => acc + value.totalCount, 0)
+    const soldCount = totalCount - event.tickets.reduce((acc, value) => acc + value.currentCount, 0)
+    const totalIncome = event.guests.reduce(
+      (acc, value) =>
+        acc + value.priceType === TicketPriceTypes.EarlyBird
+          ? value.ticket.earlyBirdCount
+          : value.priceType === TicketPriceTypes.LastChance
+          ? value.ticket.lastChancePrice
+          : value.ticket.regularPrice,
+      0
+    )
+    const totalBooking = event.guests.filter(item => item.paymentStatus === PaymentStatus.BOOKED).length
+    const totalBuying = event.guests.length - totalBooking
+
+    return {
+      totalCount,
+      soldCount,
+      totalIncome,
+      totalBooking,
+      totalBuying
+    }
+  }
+
+  async statisticPurchasedTickets(id: Event['id']) {
+    const event = await this.getById(id, ['guests'])
+
+    return event.guests.reduce((acc, value) => {
+      acc[value.buyDate.toISOString()] = acc[value.buyDate.toISOString()] + value.buyCount
+      return acc
+    }, {} as Record<string, number>)
+  }
+
+  async statisticTotalIncome(id: Event['id']) {
+    const event = await this.getById(id, ['guests.ticket'])
+
+    return event.guests.reduce((acc, value) => {
+      acc[value.buyDate.toISOString()] =
+        acc[value.buyDate.toISOString()] + value.priceType === TicketPriceTypes.EarlyBird
+          ? value.ticket.earlyBirdCount
+          : value.priceType === TicketPriceTypes.LastChance
+          ? value.ticket.lastChancePrice
+          : value.ticket.regularPrice
+      return acc
+    }, {} as Record<string, number>)
+  }
+
+  async statisticPrices(id: Event['id']) {
+    const event = await this.getById(id, ['guests'])
+
+    const statistic = event.guests.reduce((acc, value) => {
+      acc[value.priceType] = acc[value.priceType] + value.buyCount
+      return acc
+    }, {} as Record<TicketPriceTypes, number>)
+
+    const totalCount = Object.keys(statistic).reduce((acc, key) => acc + statistic[key as TicketPriceTypes], 0)
+
+    return Object.keys(statistic).reduce((acc, key) => {
+      acc[key as TicketPriceTypes] = (statistic[key as TicketPriceTypes] / 100) * totalCount
+      return acc
+    }, {} as Record<TicketPriceTypes, number>)
   }
 
   async statisticTypesOfTickets(id: Event['id']) {

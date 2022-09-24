@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { User } from '../user/user.entity'
 import { Event } from '../event/event.entity'
-import { Ticket } from '../ticket/ticket.entity'
+import { Ticket, TicketPriceTypes } from '../ticket/ticket.entity'
 import { ApiProperty } from '@nestjs/swagger'
 
 export enum GuestStatus {
@@ -35,6 +35,22 @@ export class Guest {
   @ApiProperty({ description: 'Is ticket used', example: true })
   @Column('bool', { default: false })
   isTicketUsed: boolean
+
+  @ApiProperty({ description: 'Ticket buy date', example: new Date().toISOString() })
+  @Column('date', { default: new Date() })
+  buyDate: Date
+
+  @ApiProperty({ description: 'Ticket buy count', example: 1 })
+  @Column('int', { default: 1 })
+  buyCount: number
+
+  @ApiProperty({
+    description: 'Current ticket price type (regular, early bird or last chance)',
+    example: TicketPriceTypes.Regular,
+    enum: TicketPriceTypes
+  })
+  @Column('text', { nullable: false, default: TicketPriceTypes.Regular })
+  priceType: TicketPriceTypes
 
   @ApiProperty({ description: 'User of this Guest', example: () => User, type: () => User })
   @ManyToOne(() => User, user => user.guests)

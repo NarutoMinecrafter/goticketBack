@@ -90,12 +90,16 @@ export class TicketService {
 
     ticket.currentCount -= count
 
+    let priceType: TicketPriceTypes = TicketPriceTypes.Regular
+
     if (ticket.earlyBirdCount > 0) {
       ticket.earlyBirdCount -= count
+      priceType = TicketPriceTypes.EarlyBird
 
       if (ticket.earlyBirdCount === 0) {
         ticket.currentPrice = ticket.regularPrice
         ticket.currentPriceType = TicketPriceTypes.Regular
+        priceType = TicketPriceTypes.Regular
       }
     } else if (ticket.regularCount > 0) {
       ticket.regularCount -= count
@@ -103,6 +107,7 @@ export class TicketService {
       if (ticket.regularCount === 0) {
         ticket.currentPrice = ticket.lastChancePrice
         ticket.currentPriceType = TicketPriceTypes.LastChance
+        priceType = TicketPriceTypes.LastChance
       }
     } else if (ticket.lastChanceCount > 0) {
       ticket.lastChanceCount -= count
@@ -117,7 +122,7 @@ export class TicketService {
 
     await this.update(ticket)
 
-    return await this.guestService.create({ user, event, ticket, paymentStatus })
+    return await this.guestService.create({ user, event, ticket, buyCount: count, priceType, paymentStatus })
   }
 
   getByAuthor(id: number) {
