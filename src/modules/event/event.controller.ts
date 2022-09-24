@@ -15,7 +15,7 @@ import { EventService } from './event.service'
 import { JwtAuthGuard } from '../auth/auth.guard'
 import { User } from '../user/user.entity'
 import { Event } from './event.entity'
-import { Ticket } from '../ticket/ticket.entity'
+import { Ticket, TicketPriceTypes } from '../ticket/ticket.entity'
 import { Guest } from '../guest/guest.entity'
 import { filesInterceptor } from './event.interceptor'
 import { SexEnum } from '../user/user.dto'
@@ -125,6 +125,44 @@ export class EventController {
     }
 
     return this.eventService.update(demoLinks?.length ? { ...dto, demoLinks } : dto, user)
+  }
+
+  @ApiOkResponse({
+    schema: { example: { totalGuests: 0, totalWomen: 0, totalMen: 0, totalUnknow: 0 } }
+  })
+  @Get('statistic/guests-header')
+  statisticGuestsHeader(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticGuestsHeader(id)
+  }
+
+  @ApiOkResponse({
+    schema: { example: { totalCount: 0, soldCount: 0, totalIncome: 0, totalBooking: 0, totalBuying: 0 } }
+  })
+  @Get('statistic/money-header')
+  statisticMoneyHeader(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticMoneyHeader(id)
+  }
+
+  @ApiOkResponse({ schema: { example: { [new Date().toISOString()]: 1000 } } })
+  @Get('statistic/purchased-tickets')
+  statisticPurchasedTickets(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticPurchasedTickets(id)
+  }
+
+  @ApiOkResponse({ schema: { example: { [new Date().toISOString()]: 1000 } } })
+  @Get('statistic/total-income')
+  statisticTotalIncome(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticTotalIncome(id)
+  }
+
+  @ApiOkResponse({
+    schema: {
+      example: { [TicketPriceTypes.EarlyBird]: 30, [TicketPriceTypes.Regular]: 60, [TicketPriceTypes.LastChance]: 30 }
+    }
+  })
+  @Get('statistic/prices')
+  statisticPrices(@Query() { id }: GetByEventIdDto) {
+    return this.eventService.statisticPrices(id)
   }
 
   @ApiOkResponse({

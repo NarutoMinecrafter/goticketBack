@@ -1,9 +1,18 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator'
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  Min,
+  ValidateNested
+} from 'class-validator'
 import { ToNumber } from '../../decorators/ToNumber'
 import { Event } from '../event/event.entity'
-import { Ticket } from '../ticket/ticket.entity'
+import { Ticket, TicketPriceTypes } from '../ticket/ticket.entity'
 import { User } from '../user/user.entity'
 import { GuestStatus, PaymentStatus } from './guest.entity'
 
@@ -25,6 +34,15 @@ export class CreateGuestDto {
   @ValidateNested()
   @Type(() => Event)
   ticket: Ticket
+
+  @Min(1)
+  @IsNumber()
+  @IsNotEmpty()
+  buyCount: number
+
+  @IsEnum(TicketPriceTypes)
+  @IsOptional()
+  priceType?: TicketPriceTypes
 
   @IsEnum(PaymentStatus)
   @IsOptional()
