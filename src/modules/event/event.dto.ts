@@ -244,7 +244,6 @@ export class GetByEventIdDto {
 export class BuyTicketsDto {
   @ApiProperty({ example: 1, description: 'Event id' })
   @IsNumber()
-  @IsArray()
   @IsNotEmpty()
   readonly id: number
 

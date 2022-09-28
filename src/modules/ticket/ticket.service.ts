@@ -53,6 +53,7 @@ export class TicketService {
     const { isAgeRequired, minRequiredAge, isSexRequired, isIDCodeRequired, isInstagramRequired } =
       event.requiredAdditionalInfo
     const { name, phone, sex, IDcode, instagram } = user
+    console.log(isAgeRequired)
 
     const age = UserService.getUserAge(user.birthdate)
 
@@ -64,9 +65,9 @@ export class TicketService {
       throw new BadRequestException('Phone not found')
     }
 
-    if ((isAgeRequired || minRequiredAge) && !age) {
-      throw new BadRequestException('Age not found')
-    }
+    // if ((isAgeRequired || minRequiredAge) && !age) {
+    //   throw new BadRequestException('Age not found')
+    // }
 
     if (isSexRequired && !sex) {
       throw new BadRequestException('Sex not found')
