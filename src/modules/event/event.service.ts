@@ -294,11 +294,11 @@ export class EventService {
     return locations.slice(0, limit)
   }
 
-  async update({ id, editors, ...dto }: ChangeEventDto, user: User) {
-    const event = await this.getById(id)
+  async update({ id, editors, tickets, ...dto }: ChangeEventDto, user: User) {
+    const event = await this.getById(id, ['editors', 'tickets', 'creator'])
 
     const isOwner = event.creator.id === user.id
-    const isEditor = event.editors.some(editor => {
+    const isEditor = event?.editors.some(editor => {
       const isThisUser = editor.user.id === user.id
 
       if (!isThisUser) {
@@ -320,26 +320,34 @@ export class EventService {
       throw new BadRequestException('You do not have permission to edit this event')
     }
 
-    const users: Editor[] = await Promise.all(
-      editors?.map(async editor => {
-        const potentialUser = await this.userService.getBy('id', editor.userId)
+    const updatedEditors: Editor[] | undefined = editors?.length
+      ? await Promise.all(
+          editors?.map(async editor => {
+            const potentialUser = await this.userService.getBy('id', editor.userId)
 
-        if (!potentialUser) {
-          throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
-        }
+            if (!potentialUser) {
+              throw new BadRequestException(`User with id ${editor.userId} is not defined!`)
+            }
 
-        return this.editorService.create(
-          {
-            userId: potentialUser.id,
-            permissions: editor.permissions,
-            event
-          },
-          user
+            return this.editorService.create(
+              {
+                userId: potentialUser.id,
+                permissions: editor.permissions,
+                event
+              },
+              user
+            )
+          }) || event.editors
         )
-      }) || event.editors
-    )
+      : undefined
 
-    const result = await this.eventRepository.update(id, { ...dto, editors: users })
+    if (tickets?.length) {
+      await Promise.all(
+        event.tickets.map((ticket, index) => this.ticketService.update({ ...ticket, ...tickets[index - 1] }))
+      )
+    }
+
+    const result = await this.eventRepository.update(id, { ...dto, editors: updatedEditors })
 
     return Boolean(result.affected)
   }
